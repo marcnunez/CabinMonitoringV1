@@ -27,6 +27,8 @@ if not args.sp:
     torch.multiprocessing.set_sharing_strategy('file_system')
 
 if __name__ == "__main__":
+    start_time = time.time()
+
     inputpath = args.inputpath
     inputlist = args.inputlist
     mode = args.mode
@@ -40,6 +42,7 @@ if __name__ == "__main__":
             im_names = files
     else:
         raise IOError('Error: must contain either --indir/--list')
+
 
     # Load input images
     data_loader = ImageLoader(im_names, batchSize=args.detbatch, format='yolo').start()
@@ -110,7 +113,7 @@ if __name__ == "__main__":
                 dt=np.mean(runtime_profile['dt']), pt=np.mean(runtime_profile['pt']), pn=np.mean(runtime_profile['pn']))
             )
 
-    print('===========================> Finish Model Running.')
+    print('===========================> Finish Model ')
     if (args.save_img or args.save_video) and not args.vis_fast:
         print('===========================> Rendering remaining images in the queue...')
         print('===========================> If this step takes too long, you can enable the --vis_fast flag to use fast rendering (real-time).')
@@ -119,3 +122,6 @@ if __name__ == "__main__":
     writer.stop()
     final_result = writer.results()
     write_json(final_result, args.outputpath)
+    elapsed_time = time.time() - start_time
+    print('Running. Time: ' + str(elapsed_time))
+

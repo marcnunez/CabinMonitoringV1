@@ -27,3 +27,11 @@ images
 *.weights
 
 coco-minival/
+
+venv/
+.idea/
+*.mp4
+*.jpg
+*.pth
+*.wegiths
+*.json

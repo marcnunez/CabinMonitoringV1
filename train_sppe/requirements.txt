@@ -1,5 +1,5 @@
 torch==0.4.0
-torchvision
+torchvision==0.2.1
 opencv-python
 matplotlib
 nibabel
