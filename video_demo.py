@@ -1,26 +1,16 @@
-import torch
-from torch.autograd import Variable
-import torch.nn.functional as F
-import torchvision.transforms as transforms
-
-import torch.nn as nn
-import torch.utils.data
-import numpy as np
 from opt import opt
 
 from dataloader import VideoLoader, DetectionLoader, DetectionProcessor, DataWriter, Mscoco
-from yolo.util import write_results, dynamic_write_results
 from SPPE.src.main_fast_inference import *
 
 import ntpath
 import os
 import sys
 from tqdm import tqdm
-import time
-from fn import getTime
+from utils.fn import getTime
 import cv2
 
-from pPose_nms import pose_nms, write_json
+from utils.pPose_nms import write_json
 
 args = opt
 args.dataset = 'coco'

@@ -16,12 +16,8 @@ import numpy as np
 import os
 import json
 import copy
-import heapq
-from munkres import Munkres, print_matrix
-from PIL import Image
 from tqdm import tqdm
-from utils import *
-from matching import orb_matching
+from utils.matching import orb_matching
 import argparse
 
 

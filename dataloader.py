@@ -3,23 +3,20 @@ import torch
 from torch.autograd import Variable
 import torch.utils.data as data
 import torchvision.transforms as transforms
-from PIL import Image, ImageDraw
+from PIL import Image
 from SPPE.src.utils.img import load_image, cropBox, im_to_torch
 from opt import opt
-from yolo.preprocess import prep_image, prep_frame, inp_to_image
-from pPose_nms import pose_nms, write_json
-from matching import candidate_reselect as matching
+from yolo.preprocess import prep_image, prep_frame
+from utils.pPose_nms import pose_nms
+from utils.matching import candidate_reselect as matching
 from SPPE.src.utils.eval import getPrediction, getMultiPeakPrediction
-from yolo.util import write_results, dynamic_write_results
+from yolo.util import dynamic_write_results
 from yolo.darknet import Darknet
-from tqdm import tqdm
 import cv2
-import json
 import numpy as np
 import sys
 import time
 import torch.multiprocessing as mp
-from multiprocessing import Process
 from multiprocessing import Queue as pQueue
 from threading import Thread
 # import the Queue class from Python 3
@@ -30,9 +27,9 @@ else:
     from Queue import Queue, LifoQueue
 
 if opt.vis_fast:
-    from fn import vis_frame_fast as vis_frame
+    from utils.fn import vis_frame_fast as vis_frame
 else:
-    from fn import vis_frame
+    from utils.fn import vis_frame
 
 
 class Image_loader(data.Dataset):
