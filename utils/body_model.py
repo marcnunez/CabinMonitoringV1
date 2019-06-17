@@ -5,10 +5,10 @@ from keypoint import Keypoint
 
 class BodyModel:
 
-    def __init__(self, image_id: int, category_id: int, score: float):
+    def __init__(self, image_id: int, category_id: int, keypoinys: np.array, score: float):
         self.image_id = image_id
         self.category_id = category_id
-        self.keypoints = Keypoints
+        self.keypoints = keypoinys
         self.score = score
 
     def set_keypoints(self, list_keypoints):
@@ -23,7 +23,7 @@ class BodyModel:
                                    aux_list[6], aux_list[7], aux_list[8], aux_list[9], aux_list[10], aux_list[11],
                                    aux_list[12], aux_list[13], aux_list[14], aux_list[15], aux_list[16])
 
-
+# Fill class with json path
 def set_body_model(path_json):
     with open(path_json) as json_file:
         data = json.load(json_file)
@@ -32,6 +32,16 @@ def set_body_model(path_json):
             body.set_keypoints(anotation['keypoints'])
             print()
 
+# Fill class ass array with json path.
+def set_body_model_as_array(path_json):
+    with open(path_json) as json_file:
+        data = json.load(json_file)
+        for anotation in data['annotations']:
+            mat_keypoints = fill_array(anotation['keypoints'])
+            body = BodyModel(anotation['image_id'], anotation['category_id'], mat_keypoints, 0)
+
+def fill_array(list_keypoints):
+    pass
 
 # calculate OKS between two single poses
 def compute_oks(anno, predict, delta):
