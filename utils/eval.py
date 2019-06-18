@@ -2,29 +2,42 @@ import numpy as np
 import json
 import os
 import statistics
+
+from rectangle import Rectangle
+
+
+THRESOLD_IOU = 0.5
+DELTA = 0.5
+
 def eval(out, ground_truth):
     compare_OKS = []
     with open(out) as json_file:
         data = json.load(json_file)
         for anotation in data:
             keypoints = get_keypoints_array(anotation['keypoints'])
-            compare_OKS.append(related_ground_truth(ground_truth, anotation['image_id'], keypoints))
-
+            rec = compute_bb(keypoints)
+            keypoints_gt = related_ground_truth(ground_truth, anotation['image_id'], rec )
+            if len(keypoints_gt) != 0:
+                compare_OKS.append(compute_oks(keypoints_gt, keypoints, DELTA))
+            else:
+                compare_OKS.append(0)
     print(statistics.mean(compare_OKS))
 
-def related_ground_truth(ground_truth, id_frame: str, out):
+def related_ground_truth(ground_truth, id_frame: str, rec):
     id_frame = id_frame.split(".")[0]+".json"
     in_dir = os.path.join(ground_truth, id_frame)
-    res = 0
+    res_iou = 0
+    res_gt = np.zeros((0))
     with open(in_dir) as json_ground_truth:
         data = json.load(json_ground_truth)
         for anotation in data :
             gt = get_keypoints_array(anotation['keypoints'])
-            oks = compute_oks(gt, out, 0.5)
-            if res < oks:
-                res = oks
-    print(str(id_frame)+" : " + str(res))
-    return res
+            rec_gt = compute_bb(gt)
+            iou = rec_gt.iou(rec)
+            if iou>res_iou and iou>THRESOLD_IOU:
+                res_iou = iou
+                res_gt = gt
+    return res_gt
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array
 def get_keypoints_array(keypoints) -> np.array:
@@ -44,6 +57,15 @@ def get_keypoints_array(keypoints) -> np.array:
             index += 1
         counter += 1
     return out
+
+
+# Define Bounding Box skeleton
+def compute_bb(keypoint_list) -> Rectangle:
+    width = max(keypoint_list[:, 1]) - min(keypoint_list[:, 1])
+    height = max(keypoint_list[:, 0]) - min(keypoint_list[:, 0])
+    rec = Rectangle((min(keypoint_list[:, 0]), min(keypoint_list[:, 1])), width, height)
+    return rec
+
 
 # calculate OKS between two single poses
 def compute_oks(anno, predict, delta):
