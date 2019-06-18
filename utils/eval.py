@@ -85,8 +85,9 @@ def compute_oks(anno, predict, delta):
     dis = np.sum((anno - predict) ** 2, axis=1)
     oks = np.mean(np.exp(-dis / 2 / delta ** 2 / scale))
     return oks
-
+"""
 out = "../examples/in/alphapose-results.json"
 ground_truth = "../examples/out/datasetsTest/anotations"
 
 eval(out, ground_truth)
+"""

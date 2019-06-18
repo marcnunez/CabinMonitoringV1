@@ -61,5 +61,6 @@ def set_box_attributes(keypoints, count, box_list) -> np.array:
     box_list[count, :, :] = box
     return box_list
 
-
+"""
 create_h5("../examples/out/datasetsTest/anotations")
+"""
