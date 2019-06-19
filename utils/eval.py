@@ -6,8 +6,8 @@ import statistics
 from rectangle import Rectangle, compute_bb
 
 
-THRESOLD_IOU = 0.5
-DELTA = 0.5
+THRESOLD_IOU = 0.7
+DELTA = 0.2
 
 def eval(out, ground_truth):
     compare_OKS = []
@@ -18,10 +18,10 @@ def eval(out, ground_truth):
             rec = compute_bb(keypoints)
             keypoints_gt = get_ground_truth_associated(ground_truth, anotation['image_id'], rec )
             if len(keypoints_gt) != 0:
-                compare_OKS.append(compute_oks(keypoints_gt, keypoints, DELTA))
-            else:
-                compare_OKS.append(0)
+                oks = compute_oks(keypoints_gt, keypoints, DELTA)
+                compare_OKS.append(oks)
     print(statistics.mean(compare_OKS))
+
 
 def get_ground_truth_associated(ground_truth, id_frame: str, rec):
     id_frame = id_frame.split(".")[0]+".json"
@@ -38,6 +38,7 @@ def get_ground_truth_associated(ground_truth, id_frame: str, rec):
                 res_iou = iou
                 res_gt = gt
     return res_gt
+
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array
 def parse_keypoints_to_array(keypoints) -> np.array:
@@ -58,6 +59,7 @@ def parse_keypoints_to_array(keypoints) -> np.array:
         counter += 1
     return out
 
+
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array
 def parse_keypoints_to_array_no_coinf(keypoints) -> np.array:
     counter = 1
@@ -75,6 +77,7 @@ def parse_keypoints_to_array_no_coinf(keypoints) -> np.array:
         counter += 1
     return out
 
+
 # calculate OKS between two single poses
 def compute_oks(anno, predict, delta):
     xmax = np.max(np.vstack((anno[:, 0], predict[:, 0])))
@@ -90,4 +93,3 @@ out = "../examples/zoox/res/alphapose-results.json"
 ground_truth = "../examples/zoox/test/anotations"
 
 eval(out, ground_truth)
-"""
