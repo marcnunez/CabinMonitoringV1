@@ -49,8 +49,8 @@ class Rectangle:
         bottom_right = (max(self.get_bottom_right()[0], other.get_bottom_right()[0]),
                         max(self.get_bottom_right()[1], other.get_bottom_right()[1]))
 
-        rec.width = (bottom_right[0] - rec.top_left[0])
-        rec.height = (bottom_right[1] - rec.top_left[1])
+        rec.width = abs((bottom_right[0] - rec.top_left[0]))
+        rec.height = abs((bottom_right[1] - rec.top_left[1]))
 
         return rec
 
@@ -66,8 +66,8 @@ class Rectangle:
         bottom_right = (min(self.get_bottom_right()[0], other.get_bottom_right()[0]),
                         min(self.get_bottom_right()[1], other.get_bottom_right()[1]))
 
-        rec.width = (bottom_right[0] - rec.top_left[0])
-        rec.height = (bottom_right[1] - rec.top_left[1])
+        rec.width = abs((bottom_right[0] - rec.top_left[0]))
+        rec.height = abs((bottom_right[1] - rec.top_left[1]))
 
         return rec
 
@@ -79,7 +79,7 @@ class Rectangle:
 
 # Define Bounding Box skeleton
 def compute_bb(keypoint_list) -> Rectangle:
-    width = max(keypoint_list[:, 1]) - min(keypoint_list[:, 1])
-    height = max(keypoint_list[:, 0]) - min(keypoint_list[:, 0])
+    width = abs(max(keypoint_list[:, 1]) - min(keypoint_list[:, 1]))
+    height = abs(max(keypoint_list[:, 0]) - min(keypoint_list[:, 0]))
     rec = Rectangle((min(keypoint_list[:, 0]), min(keypoint_list[:, 1])), width, height)
     return rec

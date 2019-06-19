@@ -7,20 +7,40 @@ from rectangle import Rectangle, compute_bb
 
 
 THRESOLD_IOU = 0.7
-DELTA = 0.2
+DELTA = 0.9
 
 def eval(out, ground_truth):
     compare_OKS = []
     with open(out) as json_file:
         data = json.load(json_file)
-        for anotation in data:
-            keypoints = parse_keypoints_to_array(anotation['keypoints'])
-            rec = compute_bb(keypoints)
-            keypoints_gt = get_ground_truth_associated(ground_truth, anotation['image_id'], rec )
-            if len(keypoints_gt) != 0:
-                oks = compute_oks(keypoints_gt, keypoints, DELTA)
-                compare_OKS.append(oks)
+
+        with open(ground_truth) as gt_file:
+            gt_data = json.load(gt_file)
+
+            for anotation in data:
+                keypoints = parse_keypoints_to_array(anotation['keypoints'])
+                rectangle = compute_bb(keypoints)
+                list_related_kp = list(filter(lambda gt: gt['image_id'] == anotation['image_id'], gt_data))
+                res_iou = 0
+                res_gt_keypoints = np.zeros((0))
+
+                for gt_anotated in list_related_kp:
+                    keypoints_gt = parse_keypoints_to_array(gt_anotated['keypoints'])
+                    rectangle_gt = compute_bb(keypoints_gt)
+                    iou = rectangle.iou(rectangle_gt)
+
+                    if iou > res_iou and iou > THRESOLD_IOU:
+                        res_iou = iou
+                        res_gt_keypoints = keypoints_gt
+
+                if res_iou!=0:
+                    oks = compute_oks(res_gt_keypoints, keypoints_gt, DELTA)
+                    compare_OKS.append(oks)
+                    print(str(oks) + " : " + anotation['image_id'])
+
     print(statistics.mean(compare_OKS))
+
+
 
 
 def get_ground_truth_associated(ground_truth, id_frame: str, rec):
@@ -90,6 +110,6 @@ def compute_oks(anno, predict, delta):
     return oks
 
 out = "../examples/zoox/res/alphapose-results.json"
-ground_truth = "../examples/zoox/test/anotations"
+ground_truth = "../examples/zoox/test/zoox-test.json"
 
 eval(out, ground_truth)
