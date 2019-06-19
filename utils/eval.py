@@ -79,7 +79,7 @@ def compute_oks(anno, predict, delta):
 
     return oks
 
-out = "../examples/in/alphapose-results.json"
-ground_truth = "../examples/out/datasetsTest/anotations"
+out = "../examples/zoox/res/alphapose-results.json"
+ground_truth = "../examples/zoox/test/anotations"
 
 eval(out, ground_truth)

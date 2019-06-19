@@ -35,3 +35,6 @@ venv/
 *.pth
 *.wegiths
 *.json
+
+*.tensorflow
+*coco
