@@ -5,7 +5,7 @@
 
 import argparse
 
-parser = argparse.ArgumentParser(description='PyTorch AlphaPose Training')
+parser = argparse.ArgumentParser(description='PyTorch CabinMonitoringV1 Training')
 
 "----------------------------- General options -----------------------------"
 parser.add_argument('--expID', default='default', type=str,
@@ -17,7 +17,7 @@ parser.add_argument('--nThreads', default=30, type=int,
 parser.add_argument('--snapshot', default=1, type=int,
                     help='How often to take a snapshot of the model (0 = never)')
 
-"----------------------------- AlphaPose options -----------------------------"
+"----------------------------- CabinMonitoringV1 options -----------------------------"
 parser.add_argument('--addDPG', default=False, dest='addDPG',
                     help='Train with data augmentation', action='store_true')
 

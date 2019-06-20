@@ -2,7 +2,7 @@
 
 '''
 File: tracker-general.py
-Project: AlphaPose
+Project: CabinMonitoringV1
 File Created: Tuesday, 18st Dec 2018 14:55:41 pm
 -----
 Last Modified: Thursday, 20st Dec 2018 23:24:47 pm
@@ -76,7 +76,7 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(description='FoseFlow Tracker')
     parser.add_argument('--imgdir', type=str, required=True, help="Must input the images dir")
-    parser.add_argument('--in_json', type=str, required=True, help="result json predicted by AlphaPose")
+    parser.add_argument('--in_json', type=str, required=True, help="result json predicted by CabinMonitoringV1")
     parser.add_argument('--out_json', type=str, required=True, help="output path of tracked json")
     parser.add_argument('--visdir', type=str, default="", help="visulization tracked results of video sequences")
 

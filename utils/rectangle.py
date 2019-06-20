@@ -18,7 +18,7 @@ class Rectangle:
         self.height = height
 
     def get_bottom_right(self) -> (float, float):
-        return self.top_left[0] + self.width, self.top_left[1] + self.height
+        return self.top_left[0] + self.height, self.top_left[1] + self.width
 
     def get_bottom_left(self) -> (float, float):
         return self.top_left[0] + self.width, self.top_left[1]
@@ -39,6 +39,10 @@ class Rectangle:
     def contains_point(self, point: (float, float)) -> bool:
         return (self.top_left[0] <= point[0] <= self.get_bottom_right()[0] and
                 self.top_left[1] <= point[1] <= self.get_bottom_right()[1])
+
+    @staticmethod
+    def parse_int(coordinate=(0, 0)) -> (int, int):
+        return int(coordinate[0]), int(coordinate[1])
 
     def get_area(self):
         return self.width * self.height

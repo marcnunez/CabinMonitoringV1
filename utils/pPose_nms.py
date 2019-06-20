@@ -311,7 +311,7 @@ def write_json(all_results, outputpath, for_eval=False):
             if form == 'cmu': # the form of CMU-Pose
                 if result['image_id'] not in json_results_cmu.keys():
                     json_results_cmu[result['image_id']]={}
-                    json_results_cmu[result['image_id']]['version']="AlphaPose v0.2"
+                    json_results_cmu[result['image_id']]['version']="CabinMonitoringV1 v0.2"
                     json_results_cmu[result['image_id']]['bodies']=[]
                 tmp={'joints':[]}
                 result['keypoints'].append((result['keypoints'][15]+result['keypoints'][18])/2)
@@ -326,7 +326,7 @@ def write_json(all_results, outputpath, for_eval=False):
             elif form == 'open': # the form of OpenPose
                 if result['image_id'] not in json_results_cmu.keys():
                     json_results_cmu[result['image_id']]={}
-                    json_results_cmu[result['image_id']]['version']="AlphaPose v0.2"
+                    json_results_cmu[result['image_id']]['version']="CabinMonitoringV1 v0.2"
                     json_results_cmu[result['image_id']]['people']=[]
                 tmp={'pose_keypoints_2d':[]}
                 result['keypoints'].append((result['keypoints'][15]+result['keypoints'][18])/2)

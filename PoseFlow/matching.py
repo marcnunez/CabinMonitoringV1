@@ -1,7 +1,7 @@
 # coding: utf-8
 '''
 File: matching.py
-Project: AlphaPose
+Project: CabinMonitoringV1
 File Created: Monday, 1st October 2018 12:53:12 pm
 Author: Yuliang Xiu (yuliangxiu@sjtu.edu.cn)
 Copyright 2018 - 2018 Shanghai Jiao Tong University, Machine Vision and Intelligence Group

@@ -2,7 +2,7 @@
 
 '''
 File: utils.py
-Project: AlphaPose
+Project: CabinMonitoringV1
 File Created: Thursday, 1st March 2018 5:32:34 pm
 Author: Yuliang Xiu (yuliangxiu@sjtu.edu.cn)
 -----

@@ -646,7 +646,7 @@ class DataWriter:
                     if opt.save_img or opt.save_video or opt.vis:
                         img = orig_img
                         if opt.vis:
-                            cv2.imshow("AlphaPose Demo", img)
+                            cv2.imshow("CabinMonitoringV1 Demo", img)
                             cv2.waitKey(30)
                         if opt.save_img:
                             cv2.imwrite(os.path.join(opt.outputpath, 'vis', im_name), img)
@@ -671,7 +671,7 @@ class DataWriter:
                     if opt.save_img or opt.save_video or opt.vis:
                         img = vis_frame(orig_img, result)
                         if opt.vis:
-                            cv2.imshow("AlphaPose Demo", img)
+                            cv2.imshow("CabinMonitoringV1 Demo", img)
                             cv2.waitKey(30)
                         if opt.save_img:
                             cv2.imwrite(os.path.join(opt.outputpath, 'vis', im_name), img)

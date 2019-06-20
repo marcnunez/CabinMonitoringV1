@@ -4,12 +4,52 @@ import os
 import statistics
 
 from rectangle import Rectangle, compute_bb
+from plot_results import plot_boxes
+
+THRESOLD_IOU = 0.5
+DELTA = 0.1
+
+def eval_oks_iou(out, ground_truth, debug= False):
+    compare_OKS = []
+    counter = 0
+    with open(out) as json_file:
+        data = json.load(json_file)
+
+        with open(ground_truth) as gt_file:
+            gt_data = json.load(gt_file)
+
+            for anotation in data:
+                keypoints = parse_keypoints_to_array(anotation['keypoints'])
+                rectangle = compute_bb(keypoints)
+                list_related_kp = list(filter(lambda gt: gt['image_id'] == anotation['image_id'], gt_data))
+                res_iou = 0
+                res_gt_keypoints = np.zeros((0))
+
+                for gt_anotated in list_related_kp:
+                    keypoints_gt = parse_keypoints_to_array(gt_anotated['keypoints'])
+                    rectangle_gt = compute_bb(keypoints_gt)
+                    iou = rectangle.iou(rectangle_gt)
+
+                    if debug:
+                        path_image = os.path.join("../examples/zoox/res/vis", anotation['image_id'])
+                        plot_boxes(path_image, rectangle, rectangle_gt)
+
+                    if iou > res_iou and iou > THRESOLD_IOU:
+                        res_iou = iou
+                        res_gt_keypoints = keypoints_gt
+
+                if res_iou!=0:
+                    oks = compute_oks(res_gt_keypoints, keypoints, DELTA)
+                    compare_OKS.append(oks)
+                    print(str(oks) + " : " + anotation['image_id'])
+                else:
+                    counter +=1
+                    print(counter)
+
+    print(statistics.mean(compare_OKS))
 
 
-THRESOLD_IOU = 0.7
-DELTA = 0.9
-
-def eval(out, ground_truth):
+def eval_oks_ap(out, ground_truth):
     compare_OKS = []
     with open(out) as json_file:
         data = json.load(json_file)
@@ -37,10 +77,10 @@ def eval(out, ground_truth):
                     oks = compute_oks(res_gt_keypoints, keypoints_gt, DELTA)
                     compare_OKS.append(oks)
                     print(str(oks) + " : " + anotation['image_id'])
+                else:
+                    compare_OKS.append(0)
 
     print(statistics.mean(compare_OKS))
-
-
 
 
 def get_ground_truth_associated(ground_truth, id_frame: str, rec):
@@ -112,4 +152,4 @@ def compute_oks(anno, predict, delta):
 out = "../examples/zoox/res/alphapose-results.json"
 ground_truth = "../examples/zoox/test/zoox-test.json"
 
-eval(out, ground_truth)
+eval_oks_iou(out, ground_truth, True)
