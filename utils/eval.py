@@ -185,6 +185,6 @@ if __name__ == '__main__':
     ground_truth = "../examples/zoox/test/zoox-test.json"
 
     summation_map = eval_json_ap(out, ground_truth)
-    print(summation_map)
+    print("mAP OKS 0.5 : ", summation_map)
     mean_oks = eval_oks_iou(out, ground_truth, False)
-    print(mean_oks)
+    print("mean OKS IoU 0.5 : ", mean_oks)
