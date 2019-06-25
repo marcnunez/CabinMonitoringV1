@@ -3,14 +3,13 @@ import json
 import os
 import statistics
 
+from functional import seq
 from model.rectangle import Rectangle, compute_bb
 from plot_results import plot_boxes
 from model.results import Result
 
-THRESOLD_IOU = 0.5
-DELTA = 0.1
-THRESOLD_OKS = 0.5
 
+# Evaluate mean OKS of those skeletons that have an IOU over a threshold
 def eval_oks_iou(out, ground_truth, debug= False):
     compare_OKS = []
     counter = 0
@@ -43,17 +42,14 @@ def eval_oks_iou(out, ground_truth, debug= False):
                 if res_iou!=0:
                     oks = compute_oks(res_gt_keypoints, keypoints, DELTA)
                     compare_OKS.append(oks)
-                    print(str(oks) + " : " + anotation['image_id'])
                 else:
                     counter +=1
-                    print(counter)
-
-    print(statistics.mean(compare_OKS))
+    return statistics.mean(compare_OKS)
 
 
-def eval_oks_ap(out, ground_truth):
+# Obtain metrics from all the dataset
+def full_results(out, ground_truth):
     tp = 0
-    count_gt =0
     with open(out) as json_file:
         data = json.load(json_file)
         count_detections = len(data)
@@ -71,7 +67,6 @@ def eval_oks_ap(out, ground_truth):
                         tp += 1
                         break
 
-
     gt_file.close()
     json_file.close()
 
@@ -81,24 +76,56 @@ def eval_oks_ap(out, ground_truth):
     return Result(tp, 0, fp, fn)
 
 
+# Compute
+def eval_json_ap(out, ground_truth):
+    res_total = full_results(out, ground_truth)
+
+    ap = []
+    processed_frame = []
+
+    running_tp = 0
+    running_total = 0
+    with open(ground_truth) as gt_file:
+        with open(out) as det_file:
+            det_data = json.load(det_file)
+            gt_data = json.load(gt_file)
+
+            for gt_anotation in gt_data:
+                if gt_anotation['image_id'] not in processed_frame:
+                    processed_frame.append(gt_anotation['image_id'])
+                    list_gt_kp = list(filter(lambda gt: gt['image_id'] == gt_anotation['image_id'], gt_data))
+                    list_det_kp = list(filter(lambda det: det['image_id'] == gt_anotation['image_id'], det_data))
+                    res = eval_ap_oks(list_gt_kp, list_det_kp)
+                    running_tp += res.tp
+                    running_total += res.tp + res.fp
+                    if running_total == 0:
+                        continue
+                    ap.append((running_tp / running_total, running_tp / (res_total.tp + res_total.fn)))
+
+    summation = 0
+    max_recall = seq(ap).max_by(lambda p_r: p_r[1])[1]
+    for recall_th in np.linspace(0, 1, 11):
+        if recall_th <= max_recall:
+            summation += seq(ap).filter(lambda p_r: p_r[1] >= recall_th).max_by(lambda p_r: p_r[0])[0]/11
+
+    gt_file.close()
+    det_file.close()
+    return summation
 
 
-def get_ground_truth_associated(ground_truth, id_frame: str, rec):
-    id_frame = id_frame.split(".")[0]+".json"
-    in_dir = os.path.join(ground_truth, id_frame)
-    res_iou = 0
-    res_gt = np.zeros((0))
-    with open(in_dir) as json_ground_truth:
-        data = json.load(json_ground_truth)
-        for anotation in data :
-            gt = parse_keypoints_to_array(anotation['keypoints'])
-            rec_gt = compute_bb(gt)
-            iou = rec_gt.iou(rec)
-            if iou>res_iou and iou>THRESOLD_IOU:
-                res_iou = iou
-                res_gt = gt
-    return res_gt
-
+def eval_ap_oks(gt, det) -> Result:
+    tp = 0
+    for ground_truth in gt:
+        ground_truth_keypoints = parse_keypoints_to_array(ground_truth['keypoints'])
+        for detection in det:
+            detection_keypoints = parse_keypoints_to_array(detection['keypoints'])
+            if compute_oks(ground_truth_keypoints, detection_keypoints, DELTA) > THRESOLD_OKS:
+                tp += 1
+                break
+    fp = len(det) - tp
+    fn = len(gt) - tp
+    res = Result(tp, fp, 0, fn)
+    return res
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array
 def parse_keypoints_to_array(keypoints) -> np.array:
@@ -149,9 +176,15 @@ def compute_oks(anno, predict, delta):
     oks = np.mean(np.exp(-dis / 2 / delta ** 2 / scale))
     return oks
 
-out = "../examples/zoox/res/alphapose-results.json"
-ground_truth = "../examples/zoox/test/zoox-test.json"
 
-#eval_oks_iou(out, ground_truth, False)
-r = eval_oks_ap(out, ground_truth)
-print()
+if __name__ == '__main__':
+    THRESOLD_IOU = 0.5
+    DELTA = 0.1
+    THRESOLD_OKS = 0.5
+    out = "../examples/zoox/res/alphapose-results.json"
+    ground_truth = "../examples/zoox/test/zoox-test.json"
+
+    summation_map = eval_json_ap(out, ground_truth)
+    print(summation_map)
+    mean_oks = eval_oks_iou(out, ground_truth, False)
+    print(mean_oks)
