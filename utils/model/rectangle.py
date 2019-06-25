@@ -81,6 +81,7 @@ class Rectangle:
     def __str__(self):
         return 'Rectangle(top_left={0}, width={1}, height={2})'.format(self.top_left, self.width, self.height)
 
+
 # Define Bounding Box skeleton
 def compute_bb(keypoint_list) -> Rectangle:
     width = abs(max(keypoint_list[:, 1]) - min(keypoint_list[:, 1]))
