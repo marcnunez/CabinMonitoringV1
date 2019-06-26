@@ -38,3 +38,5 @@ venv/
 
 *.tensorflow
 *coco
+*.tensorboard
+train_sppe/data/*

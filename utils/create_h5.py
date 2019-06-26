@@ -26,7 +26,7 @@ def create_h5(dir_json):
     dset = h5.File("annot_cabin.h5", 'w')
     dset.create_dataset("bndbox", (275, 1, 4), data=box_list)
     dset.create_dataset("imgname", (275, 16), data=name_list)
-    dset.create_dataset("parts", (275, 17, 2), data=parts_list)
+    dset.create_dataset("part", (275, 17, 2), data=parts_list)
     dset.close()
 
 
@@ -63,4 +63,4 @@ def set_box_attributes(keypoints, count, box_list) -> np.array:
 
 if __name__ == '__main__':
     create_h5('../examples/zoox/test/anotations')
-    rename_images('../examples/zoox/test/frames')
+    #rename_images('../examples/zoox/test/frames')
