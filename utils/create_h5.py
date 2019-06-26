@@ -3,7 +3,7 @@ import json
 import h5py as h5
 from eval import parse_keypoints_to_array_no_coinf
 import numpy as np
-from rectangle import Rectangle, compute_bb
+from model.rectangle import Rectangle, compute_bb
 import cv2
 
 
@@ -31,8 +31,7 @@ def create_h5(dir_json):
 
 
 # change the format of the images in order to adapt it to the h5
-def rename_images():
-    dir_path = "../examples/out/datasetsTest/frames"
+def rename_images(dir_path):
     for partial_path in os.listdir(dir_path):
         img_path = os.path.join(dir_path, partial_path)
         img = cv2.imread(img_path)
@@ -61,6 +60,7 @@ def set_box_attributes(keypoints, count, box_list) -> np.array:
     box_list[count, :, :] = box
     return box_list
 
-"""
-create_h5("../examples/out/datasetsTest/anotations")
-"""
+
+if __name__ == '__main__':
+    create_h5('../examples/zoox/test/anotations')
+    rename_images('../examples/zoox/test/frames')
