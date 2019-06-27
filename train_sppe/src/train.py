@@ -206,6 +206,8 @@ def main():
                 mAP5=mAP5
             ))
         '''
+    m_module = m.module
+    torch.save(m_module.state_dict(), '../exp/{}/{}/cabin.pth'.format(opt.dataset, opt.expID))
     writer.close()
 
 

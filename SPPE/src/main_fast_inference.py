@@ -58,7 +58,7 @@ class InferenNet_fast(nn.Module):
 
         model = createModel().cuda()
         print('Loading pose model from {}'.format('./models/sppe/duc_se.pth'))
-        model.load_state_dict(torch.load('./models/sppe/duc_se.pth'))
+        model.load_state_dict(torch.load('./models/sppe/model_33.pkl'))
         model.eval()
         self.pyranet = model
 

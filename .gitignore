@@ -40,3 +40,4 @@ venv/
 *coco
 *.tensorboard
 train_sppe/data/*
+*.pkl
