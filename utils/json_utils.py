@@ -23,7 +23,7 @@ def fix_json_format(in_path):
     json_file.close()
 
 
-def read_json_sub_files(in_path):
+def fix_json_format_full_directory(in_path):
     for filename in os.listdir(in_path):
         print(filename)
         path_json = os.path.join(in_path, filename)
@@ -82,13 +82,14 @@ def check_processed(json_name) -> bool:
     return os.path.exists(json_name)
 
 
-def merge_json():
-    list_anno = read_anotations('../examples/zoox/test/anotations')
-    with open('../examples/zoox/test/zoox-test.json', 'w') as json_file:
+def merge_json(indir, outdir):
+    list_anno = read_anotations(indir)
+    with open(outdir, 'w') as json_file:
         json.dump(list_anno, json_file)
-    fix_json_format('../examples/zoox/test/zoox-test.json')
+    fix_json_format(outdir)
 
 
 if __name__ == '__main__':
-    anotate_frame('../examples/zoox/anotations2', '../examples/zoox/frames2')
-    read_json_sub_files('../examples/zoox/anotations2')
+    anotate_frame('../examples/zoox/test/anotations2', '../examples/zoox/test/frames2')
+    fix_json_format_full_directory('../examples/zoox/test/anotations2')
+    merge_json('../examples/zoox/test/anotations2', '../examples/zoox/test/zoox-test2.json')
