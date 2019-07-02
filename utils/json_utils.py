@@ -88,3 +88,7 @@ def merge_json():
         json.dump(list_anno, json_file)
     fix_json_format('../examples/zoox/test/zoox-test.json')
 
+
+if __name__ == '__main__':
+    anotate_frame('../examples/zoox/anotations2', '../examples/zoox/frames2')
+    read_json_sub_files('../examples/zoox/anotations2')
