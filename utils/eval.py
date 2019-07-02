@@ -124,7 +124,7 @@ def eval_ap_oks(gt, det) -> Result:
                 break
     fp = len(det) - tp
     fn = len(gt) - tp
-    res = Result(tp, fp, 0, fn)
+    res = Result(tp, 0, fp, fn)
     return res
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array

@@ -1,4 +1,5 @@
 human_detection/output
+examples/data
 examples/results
 examples/res
 PoseFlow/__pycache__
@@ -40,3 +41,4 @@ venv/
 *coco
 *.tensorboard
 train_sppe/data/*
+*.pkl

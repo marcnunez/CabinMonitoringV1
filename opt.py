@@ -36,6 +36,8 @@ parser.add_argument('--nClasses', default=33, type=int,
                     help='Number of output channel')
 parser.add_argument('--nStack', default=4, type=int,
                     help='Number of hourglasses to stack')
+parser.add_argument('--pathModel', default='./models/sppe/duc_se.pth', type=str,
+                    help='Provide full path to a SPPE model')
 
 "----------------------------- Hyperparameter options -----------------------------"
 parser.add_argument('--fast_inference', default=True, type=bool,

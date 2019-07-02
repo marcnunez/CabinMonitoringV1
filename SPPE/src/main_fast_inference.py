@@ -11,7 +11,7 @@ from SPPE.src.models.FastPose import createModel
 import visdom
 import time
 import sys
-
+from opt import opt
 import torch._utils
 try:
     torch._utils._rebuild_tensor_v2
@@ -29,9 +29,9 @@ class InferenNet(nn.Module):
         super(InferenNet, self).__init__()
 
         model = createModel().cuda()
-        print('Loading pose model from {}'.format('./models/sppe/duc_se.pth'))
+        print('Loading pose model from {}'.format(opt.pathModel))
         sys.stdout.flush()
-        model.load_state_dict(torch.load('./models/sppe/duc_se.pth'))
+        model.load_state_dict(torch.load(opt.pathModel))
         model.eval()
         self.pyranet = model
 
@@ -57,8 +57,8 @@ class InferenNet_fast(nn.Module):
         super(InferenNet_fast, self).__init__()
 
         model = createModel().cuda()
-        print('Loading pose model from {}'.format('./models/sppe/duc_se.pth'))
-        model.load_state_dict(torch.load('./models/sppe/duc_se.pth'))
+        print('Loading pose model from {}'.format(opt.pathModel))
+        model.load_state_dict(torch.load(opt.pathModel))
         model.eval()
         self.pyranet = model
 
