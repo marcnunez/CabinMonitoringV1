@@ -32,10 +32,12 @@ parser.add_argument('--Continue', default=False, type=bool,
                     help='Pick up where an experiment left off')
 parser.add_argument('--nFeats', default=256, type=int,
                     help='Number of features in the hourglass')
-parser.add_argument('--nClasses', default=17, type=int,
+parser.add_argument('--nClasses', default=33, type=int,
                     help='Number of output channel')
 parser.add_argument('--nStack', default=4, type=int,
                     help='Number of hourglasses to stack')
+parser.add_argument('--pathModel', default='./models/sppe/duc_se.pth', type=str,
+                    help='Provide full path to a SPPE model')
 
 "----------------------------- Hyperparameter options -----------------------------"
 parser.add_argument('--fast_inference', default=True, type=bool,
