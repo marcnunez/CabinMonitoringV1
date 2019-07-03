@@ -14,7 +14,7 @@ Project forked from:
 
 1. Get the code.
   ```Shell
-  git clone -b pytorch https://github.com/MVIG-SJTU/AlphaPose.git
+  git clone -b pytorch https://github.com/marcnunez/CabinMonitoringV1.git
   ```
 
 2. Install [pytorch 0.4.0](https://github.com/pytorch/pytorch) and other dependencies.
@@ -53,22 +53,6 @@ python3 demo.py --indir ${img_directory} --outdir examples/res --fast_inference 
 - **Speeding up**:  Checkout the [speed_up.md](doc/speed_up.md) for more details.
 - **Output format**: Checkout the [output.md](doc/output.md) for more details.
 - **For more**:  Checkout the [run.md](doc/run.md) for more options
-
-## Pose Tracking
-
-<p align='center'>
-    <img src="doc/posetrack.gif", width="360">
-    <img src="doc/posetrack2.gif", width="344">
-</p>
-
-Please read [PoseFlow/README.md](PoseFlow/) for details.
-
-### CrowdPose
-<p align='center'>
-    <img src="doc/crowdpose.gif", width="360">
-</p>
-
-Please read [doc/CrowdPose.md](doc/CrowdPose.md) for details.
 
 
 
