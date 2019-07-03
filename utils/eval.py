@@ -47,7 +47,7 @@ def eval_oks_iou(out, ground_truth, debug= False):
     return statistics.mean(compare_OKS)
 
 
-# Obtain metrics from all the dataset
+# Obtain FP, TN, FN, TP from all the dataset at the same time
 def full_results(out, ground_truth):
     tp = 0
     with open(out) as json_file:
@@ -95,7 +95,7 @@ def eval_json_ap(out, ground_truth):
                     processed_frame.append(gt_anotation['image_id'])
                     list_gt_kp = list(filter(lambda gt: gt['image_id'] == gt_anotation['image_id'], gt_data))
                     list_det_kp = list(filter(lambda det: det['image_id'] == gt_anotation['image_id'], det_data))
-                    res = eval_ap_oks(list_gt_kp, list_det_kp)
+                    res = eval_mAP_oks(list_gt_kp, list_det_kp)
                     running_tp += res.tp
                     running_total += res.tp + res.fp
                     if running_total == 0:
@@ -113,7 +113,7 @@ def eval_json_ap(out, ground_truth):
     return summation
 
 
-def eval_ap_oks(gt, det) -> Result:
+def eval_mAP_oks(gt, det) -> Result:
     tp = 0
     for ground_truth in gt:
         ground_truth_keypoints = parse_keypoints_to_array(ground_truth['keypoints'])
@@ -126,6 +126,7 @@ def eval_ap_oks(gt, det) -> Result:
     fn = len(gt) - tp
     res = Result(tp, 0, fp, fn)
     return res
+
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array
 def parse_keypoints_to_array(keypoints) -> np.array:
@@ -145,6 +146,7 @@ def parse_keypoints_to_array(keypoints) -> np.array:
             index += 1
         counter += 1
     return out
+
 
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array
@@ -179,12 +181,12 @@ def compute_oks(anno, predict, delta):
 
 if __name__ == '__main__':
     THRESOLD_IOU = 0.5
-    DELTA = 0.1
     THRESOLD_OKS = 0.5
-    out = "../examples/zoox/res/alphapose-results.json"
-    ground_truth = "../examples/zoox/test/zoox-test.json"
-
-    summation_map = eval_json_ap(out, ground_truth)
-    print("mAP OKS 0.5 : ", summation_map)
-    mean_oks = eval_oks_iou(out, ground_truth, False)
-    print("mean OKS IoU 0.5 : ", mean_oks)
+    out = "../examples/zoox/res2/alphapose-results.json"
+    ground_truth = "../examples/zoox/test/zoox-test2.json"
+    for delta in range(1, 10, 1):
+        DELTA = delta * 0.1
+        summation_map = eval_json_ap(out, ground_truth)
+        print("mAP OKS 0.5 : ", summation_map, " Delta : ", DELTA)
+        mean_oks = eval_oks_iou(out, ground_truth, False)
+        print("mean OKS IoU 0.5 : ", mean_oks, " Delta : ", DELTA)

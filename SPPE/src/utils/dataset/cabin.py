@@ -28,7 +28,7 @@ class Cabin(data.Dataset):
         self.label_type = label_type
 
         self.nJoints_cabin = 17
-        self.nJoints = 17
+        self.nJoints = 33
 
         self.accIdxs = (1, 2, 3, 4, 5, 6, 7, 8,
                         9, 10, 11, 12, 13, 14, 15, 16, 17)
