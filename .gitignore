@@ -42,3 +42,5 @@ venv/
 *.tensorboard
 train_sppe/data/*
 *.pkl
+*.avi
+

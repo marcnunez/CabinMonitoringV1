@@ -1,3 +1,5 @@
+import argparse
+
 import numpy as np
 import json
 import os
@@ -9,14 +11,31 @@ from plot_results import plot_boxes
 from model.results import Result
 
 
+parser = argparse.ArgumentParser(description='PyTorch CabinMonitoringV1 Evaluation')
+
+"----------------------------- General options -----------------------------"
+parser.add_argument('--anotations', default='../examples/zoox/res/alphapose-results.json', type=str,
+                    help='Path to anotations ')
+parser.add_argument('--groundTruth', default='../examples/zoox/test/zoox-test2.json', type=str,
+                    help='Path to ground turth ')
+parser.add_argument('--debug', default=False, type=bool,
+                    help='Print the debug information')
+parser.add_argument('--oksThreshold', default=0.5, type=float,
+                    help='Threshold between 0-1 of mimum OKS')
+parser.add_argument('--iouThreshold', default=0.5, type=float,
+                    help='Threshold between 0-1 of mimum IOU')
+
+opt = parser.parse_args()
+
+
 # Evaluate mean OKS of those skeletons that have an IOU over a threshold
-def eval_oks_iou(out, ground_truth, debug= False):
+def eval_oks_iou():
     compare_OKS = []
     counter = 0
-    with open(out) as json_file:
+    with open(opt.anotations) as json_file:
         data = json.load(json_file)
 
-        with open(ground_truth) as gt_file:
+        with open(opt.groundTruth) as gt_file:
             gt_data = json.load(gt_file)
 
             for anotation in data:
@@ -31,11 +50,11 @@ def eval_oks_iou(out, ground_truth, debug= False):
                     rectangle_gt = compute_bb(keypoints_gt)
                     iou = rectangle.iou(rectangle_gt)
 
-                    if debug:
+                    if opt.debug:
                         path_image = os.path.join("../examples/zoox/res/vis", anotation['image_id'])
                         plot_boxes(path_image, rectangle, rectangle_gt)
 
-                    if iou > res_iou and iou > THRESOLD_IOU:
+                    if iou > res_iou and iou > opt.iouThreshold:
                         res_iou = iou
                         res_gt_keypoints = keypoints_gt
 
@@ -48,14 +67,16 @@ def eval_oks_iou(out, ground_truth, debug= False):
 
 
 # Obtain FP, TN, FN, TP from all the dataset at the same time
-def full_results(out, ground_truth):
+def full_results():
     tp = 0
-    with open(out) as json_file:
+    with open(opt.anotations) as json_file:
         data = json.load(json_file)
         count_detections = len(data)
-        with open(ground_truth) as gt_file:
+
+        with open(opt.groundTruth) as gt_file:
             gt_data = json.load(gt_file)
             count_gt = len(gt_data)
+
             for anotation in data:
                 keypoints = parse_keypoints_to_array(anotation['keypoints'])
                 list_related_kp = list(filter(lambda gt: gt['image_id'] == anotation['image_id'], gt_data))
@@ -63,7 +84,7 @@ def full_results(out, ground_truth):
                 for gt_anotated in list_related_kp:
                     keypoints_gt = parse_keypoints_to_array(gt_anotated['keypoints'])
                     oks = compute_oks(keypoints_gt, keypoints, DELTA)
-                    if oks > THRESOLD_OKS:
+                    if oks > opt.oksThreshold:
                         tp += 1
                         break
 
@@ -77,16 +98,16 @@ def full_results(out, ground_truth):
 
 
 # Compute
-def eval_json_ap(out, ground_truth):
-    res_total = full_results(out, ground_truth)
+def eval_json_ap():
+    res_total = full_results()
 
     ap = []
     processed_frame = []
 
     running_tp = 0
     running_total = 0
-    with open(ground_truth) as gt_file:
-        with open(out) as det_file:
+    with open(opt.groundTruth) as gt_file:
+        with open(opt.anotations) as det_file:
             det_data = json.load(det_file)
             gt_data = json.load(gt_file)
 
@@ -119,7 +140,7 @@ def eval_mAP_oks(gt, det) -> Result:
         ground_truth_keypoints = parse_keypoints_to_array(ground_truth['keypoints'])
         for detection in det:
             detection_keypoints = parse_keypoints_to_array(detection['keypoints'])
-            if compute_oks(ground_truth_keypoints, detection_keypoints, DELTA) > THRESOLD_OKS:
+            if compute_oks(ground_truth_keypoints, detection_keypoints, DELTA) > opt.oksThreshold:
                 tp += 1
                 break
     fp = len(det) - tp
@@ -146,7 +167,6 @@ def parse_keypoints_to_array(keypoints) -> np.array:
             index += 1
         counter += 1
     return out
-
 
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array
@@ -180,13 +200,9 @@ def compute_oks(anno, predict, delta):
 
 
 if __name__ == '__main__':
-    THRESOLD_IOU = 0.5
-    THRESOLD_OKS = 0.5
-    out = "../examples/zoox/res2/alphapose-results.json"
-    ground_truth = "../examples/zoox/test/zoox-test2.json"
     for delta in range(1, 10, 1):
         DELTA = delta * 0.1
-        summation_map = eval_json_ap(out, ground_truth)
+        summation_map = eval_json_ap()
         print("mAP OKS 0.5 : ", summation_map, " Delta : ", DELTA)
-        mean_oks = eval_oks_iou(out, ground_truth, False)
+        mean_oks = eval_oks_iou()
         print("mean OKS IoU 0.5 : ", mean_oks, " Delta : ", DELTA)
