@@ -90,6 +90,9 @@ def merge_json(indir, outdir):
 
 
 if __name__ == '__main__':
+    """
     anotate_frame('../examples/zoox/test/anotations2', '../examples/zoox/test/frames2')
     fix_json_format_full_directory('../examples/zoox/test/anotations2')
-    merge_json('../examples/zoox/test/anotations2', '../examples/zoox/test/zoox-test2.json')
+    merge_json('../examples/zoox/test/anotations2', '../examples/zoox/test/zoox-test2.json')  
+    """
+    anotate_frame('../examples/dummy/anotations', '../examples/dummy/frames')

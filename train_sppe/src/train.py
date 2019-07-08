@@ -30,6 +30,8 @@ def train(train_loader, m, criterion, optimizer, writer):
         setMask = setMask.cuda()
         out = m(inps)
 
+        out = out.narrow(1, 0, 17)
+
         loss = criterion(out.mul(setMask), labels)
 
         acc = accuracy(out.data.mul(setMask), labels.data, train_loader.dataset)
@@ -75,10 +77,14 @@ def valid(val_loader, m, criterion, optimizer, writer):
         with torch.no_grad():
             out = m(inps)
 
+            out = out.narrow(1, 0, 17)
+
             loss = criterion(out.mul(setMask), labels)
 
             flip_out = m(flip(inps))
             flip_out = flip(shuffleLR(flip_out, val_loader.dataset))
+
+            flip_out = flip_out.narrow(1, 0, 17)
 
             out = (flip_out + out) / 2
 
