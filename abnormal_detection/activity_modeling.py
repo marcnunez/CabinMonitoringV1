@@ -25,18 +25,20 @@ class body_model():
         xmin = np.min((keypoints[:, 0]))
         ymax = np.max((keypoints[:, 1]))
         ymin = np.min((keypoints[:, 1]))
-        xscale = xmax-xmin
-        yscale = ymax-ymin
+        xscale = abs(xmax-xmin)
+        yscale = abs(ymax-ymin)
 
-        keypoints[:, 0] = keypoints[:, 0] * xscale
-        keypoints[:, 1] = keypoints[:, 1] * yscale
+        keypoints[:, 0] = keypoints[:, 0] / float(xscale)
+        keypoints[:, 1] = keypoints[:, 1] / float(yscale)
         return keypoints
+
+
 
 
 if __name__ == '__main__':
 
 
-    key = [[21,22,1], [13,12,1], [13,12,1], [13,12,1], [13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1], [13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],]
+    key = [[21.0,22.0,1.0], [3,25,1], [9,6,1], [7,2,1], [13,12,1],[13,12,1],[8,7,1],[13,12,1],[13,12,1], [13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],]
     key = np.vstack(key)
     patata = body_model("patata", key)
 
