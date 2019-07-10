@@ -20,6 +20,8 @@ parser.add_argument('--groundTruth', default='../examples/zoox/test/zoox-test2.j
                     help='Path to ground turth ')
 parser.add_argument('--debug', default=False, type=bool,
                     help='Print the debug information')
+parser.add_argument('--coco', default=False, type=bool,
+                    help='Test Cocos Dataset')
 parser.add_argument('--oksThreshold', default=0.5, type=float,
                     help='Threshold between 0-1 of mimum OKS')
 parser.add_argument('--iouThreshold', default=0.5, type=float,
@@ -37,11 +39,20 @@ def eval_oks_iou():
 
         with open(opt.groundTruth) as gt_file:
             gt_data = json.load(gt_file)
+            if opt.coco:
+                gt_data = gt_data['annotations']
 
             for anotation in data:
                 keypoints = parse_keypoints_to_array(anotation['keypoints'])
                 rectangle = compute_bb(keypoints)
-                list_related_kp = list(filter(lambda gt: gt['image_id'] == anotation['image_id'], gt_data))
+
+                anot = anotation['image_id']
+                if opt.coco:
+                    anot = anot.strip("0")
+                    anot = anot.strip(".jpg")
+                    anot = int(anot)
+
+                list_related_kp = list(filter(lambda gt: gt['image_id'] == anot, gt_data))
                 res_iou = 0
                 res_gt_keypoints = np.zeros((0))
 
@@ -75,11 +86,19 @@ def full_results():
 
         with open(opt.groundTruth) as gt_file:
             gt_data = json.load(gt_file)
+            if opt.coco:
+                gt_data = gt_data['annotations']
             count_gt = len(gt_data)
 
             for anotation in data:
                 keypoints = parse_keypoints_to_array(anotation['keypoints'])
-                list_related_kp = list(filter(lambda gt: gt['image_id'] == anotation['image_id'], gt_data))
+                anot = anotation['image_id']
+                if opt.coco:
+                    anot =  anot.strip("0")
+                    anot = anot.strip(".jpg")
+                    anot = int(anot)
+
+                list_related_kp = list(filter(lambda gt: gt['image_id'] == anot, gt_data))
 
                 for gt_anotated in list_related_kp:
                     keypoints_gt = parse_keypoints_to_array(gt_anotated['keypoints'])
@@ -111,14 +130,24 @@ def eval_json_ap():
             det_data = json.load(det_file)
             gt_data = json.load(gt_file)
 
+            if opt.coco:
+                gt_data = gt_data['annotations']
+
             for gt_anotation in gt_data:
                 if gt_anotation['image_id'] not in processed_frame:
                     processed_frame.append(gt_anotation['image_id'])
+
                     list_gt_kp = list(filter(lambda gt: gt['image_id'] == gt_anotation['image_id'], gt_data))
-                    list_det_kp = list(filter(lambda det: det['image_id'] == gt_anotation['image_id'], det_data))
+                    gt_anot = gt_anotation['image_id']
+                    if opt.coco:
+                        gt_anot = str(gt_anot).zfill(12) + ".jpg"
+
+                    list_det_kp = list(filter(lambda det: det['image_id'] == gt_anot, det_data))
+
                     res = eval_mAP_oks(list_gt_kp, list_det_kp)
                     running_tp += res.tp
                     running_total += res.tp + res.fp
+
                     if running_total == 0:
                         continue
                     ap.append((running_tp / running_total, running_tp / (res_total.tp + res_total.fn)))
@@ -189,15 +218,37 @@ def parse_keypoints_to_array_no_coinf(keypoints) -> np.array:
 
 # calculate OKS between two single poses
 def compute_oks(anno, predict, delta):
-    xmax = np.max(np.vstack((anno[:, 0], predict[:, 0])))
-    xmin = np.min(np.vstack((anno[:, 0], predict[:, 0])))
-    ymax = np.max(np.vstack((anno[:, 1], predict[:, 1])))
-    ymin = np.min(np.vstack((anno[:, 1], predict[:, 1])))
-    scale = (xmax - xmin) * (ymax - ymin)
-    dis = np.sum((anno - predict) ** 2, axis=1)
-    oks = np.mean(np.exp(-dis / 2 / delta ** 2 / scale))
+    oks = 0
+    if opt.coco:
+        anno, predict = remove_zeros_from_oks(anno, predict)
+    if len(anno) > 0:
+
+        xmax = np.max(np.vstack((anno[:, 0], predict[:, 0])))
+        xmin = np.min(np.vstack((anno[:, 0], predict[:, 0])))
+        ymax = np.max(np.vstack((anno[:, 1], predict[:, 1])))
+        ymin = np.min(np.vstack((anno[:, 1], predict[:, 1])))
+        anno = anno[:, 0:2]
+        predict = predict[:, 0:2]
+        scale = (xmax - xmin) * (ymax - ymin)
+        dis = np.sum((anno - predict) ** 2, axis=1)
+        oks = np.mean(np.exp(-dis / 2 / delta ** 2 / scale))
     return oks
 
+
+def remove_zeros_from_oks(anno, predict):
+    aux_anno = []
+    aux_predict = []
+    counter = 0
+    for gt in anno:
+        if gt[2] != 0.0:
+            aux_anno.append(gt)
+            aux_predict.append(predict[counter])
+
+        counter +=1
+    if len(aux_anno)>0:
+        return np.vstack(aux_anno), np.vstack(aux_predict)
+    else:
+        return [], []
 
 if __name__ == '__main__':
     for delta in range(1, 10, 1):

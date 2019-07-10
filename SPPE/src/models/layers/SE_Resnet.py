@@ -1,6 +1,7 @@
 import torch.nn as nn
 from .SE_module import SELayer
 import torch.nn.functional as F
+from opt import opt
 
 
 class Bottleneck(nn.Module):
@@ -69,6 +70,13 @@ class SEResnet(nn.Module):
 
     def forward(self, x):
         x = self.maxpool(self.relu(self.bn1(self.conv1(x))))  # 64 * h/4 * w/4
+        if opt.loadModel is not None and opt.epoch < 75:
+            for param in self.layer1.parameters():
+                param.requires_grad = False
+            for param in self.layer2.parameters():
+                param.requires_grad = False
+            for param in self.layer3.parameters():
+                param.requires_grad = False
         x = self.layer1(x)  # 256 * h/4 * w/4
         x = self.layer2(x)  # 512 * h/8 * w/8
         x = self.layer3(x)  # 1024 * h/16 * w/16
