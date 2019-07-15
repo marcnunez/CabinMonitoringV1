@@ -110,4 +110,4 @@ if __name__ == "__main__":
         pass
     writer.stop()
     final_result = writer.results()
-    write_json(final_result, args.outputpath)
+    write_json(final_result, args.outputpath, webcam)
