@@ -4,9 +4,12 @@
 #  Proin dapibus sapien vel ante. Aliquam erat volutpat. Pellentesque sagittis ligula eget metus.
 #  Vestibulum commodo. Ut rhoncus gravida arcu.
 import numpy as np
+import os
+import json
 
 
-class body_model():
+class BodyModel:
+
     def __init__(self, image_id: str, keypoints):
         self.image_id = image_id
         self.center_mass = self.set_center_mass(keypoints)
@@ -33,13 +36,17 @@ class body_model():
         return keypoints
 
 
+def read_body(in_path):
+    body_list = []
+    for filename in os.listdir(in_path):
+        json_path = os.path.join(in_path, filename)
+        with open(json_path) as json_file:
+            data = json.load(json_file)
+            for anotation in data:
+                body_list = BodyModel(anotation['image_id'], anotation['keypoints'])
+    return body_list
 
 
 if __name__ == '__main__':
 
-
-    key = [[21.0,22.0,1.0], [3,25,1], [9,6,1], [7,2,1], [13,12,1],[13,12,1],[8,7,1],[13,12,1],[13,12,1], [13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],[13,12,1],]
-    key = np.vstack(key)
-    patata = body_model("patata", key)
-
-    print()
+    read_body()
