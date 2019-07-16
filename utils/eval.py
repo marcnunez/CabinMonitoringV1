@@ -6,9 +6,9 @@ import os
 import statistics
 
 from functional import seq
-from model.rectangle import Rectangle, compute_bb
-from plot_results import plot_boxes
-from model.results import Result
+from .model.rectangle import Rectangle, compute_bb
+from .plot_results import plot_boxes
+from .model.results import Result
 
 
 parser = argparse.ArgumentParser(description='PyTorch CabinMonitoringV1 Evaluation')
