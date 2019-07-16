@@ -19,7 +19,9 @@ class BodyModel:
         self.image_id = image_id
         keypoints = parse_keypoints_to_array(keypoints)
         self.center_mass = self.set_center_mass(keypoints)
+        self.orientation = self.set_orientation(keypoints)
         self.keypoints = self.set_relative_keypoints(keypoints)
+        self.original_keypoints = keypoints[:, 0:2]
 
     @staticmethod
     def set_center_mass(keypoints):
@@ -27,10 +29,14 @@ class BodyModel:
 
     @staticmethod
     def set_orientation(keypoints):
-        pass
+        return np.arctan2(keypoints[11, 0]-keypoints[12, 0], keypoints[11, 1]-keypoints[12, 1])
 
     def set_relative_keypoints(self, keypoints):
-
+        keypoints =  keypoints[:, 0:2]
+        rotation_matrix = [[np.cos(self.orientation), -np.sin(self.orientation)], [np.sin(self.orientation),
+                                                                                   np.cos(self.orientation)]]
+        for i in range(0, len(keypoints)):
+            keypoints[i, :] = np.dot(rotation_matrix, keypoints[i,:])
         keypoints[:, 0] = keypoints[:, 0]-self.center_mass[0]
         keypoints[:, 1] = keypoints[:, 1]-self.center_mass[1]
 
@@ -43,18 +49,24 @@ class BodyModel:
 
         keypoints[:, 0] = keypoints[:, 0] / float(xscale)
         keypoints[:, 1] = keypoints[:, 1] / float(yscale)
-        return keypoints[:, 0:2]
+        return keypoints
 
 
 def fit_model(bodys):
-    sklearn_pca = PCA(n_components=2)
-    np.random.seed(1)
-    g = mixture.GaussianMixture(n_components=34)
-    print(np.round(g.weights_, 34))
-    return g.fit(bodys)
+    sklearn_pca = PCA(n_components=7)
+    sklearn_pca.fit(bodys)
+    p = sklearn_pca.transform(bodys)
+    g = mixture.GaussianMixture(n_components=2)
+    return g.fit(p)
 
 
-def predict_model()
+def predict_model(list_bodies, model):
+    sklearn_pca = PCA(n_components=7)
+    sklearn_pca.fit(list_bodies)
+    p = sklearn_pca.transform(list_bodies)
+    list     = model.fit_predict(p)
+
+    print(np.count_nonzero(list)/len(list_bodies))
 
 
 def read_body_directory(in_path):
@@ -76,8 +88,15 @@ def read_body_json(json_path):
 
 if __name__ == '__main__':
     list_bodies = []
-    bodys = read_body_json('../examples/data/activity_modeling/c3-result.json')
+    bodys = read_body_json('../examples/data/activity_modeling/c6-result.json')
     for body in bodys:
         list_bodies.append(body.keypoints.flatten())
     list_bodies = np.vstack(list_bodies)
-    fit_model(list_bodies)
+    model = fit_model(list_bodies)
+
+    list_bodies_predict = []
+    bodys = read_body_json('../examples/data/activity_modeling/c6-result.json')
+    for body in bodys:
+        list_bodies_predict.append(body.keypoints.flatten())
+    list_bodies_predict = np.vstack(list_bodies_predict)
+    predict_model(list_bodies_predict, model)
