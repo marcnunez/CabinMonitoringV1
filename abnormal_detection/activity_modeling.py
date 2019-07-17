@@ -32,11 +32,16 @@ class BodyModel:
         return np.arctan2(keypoints[11, 0]-keypoints[12, 0], keypoints[11, 1]-keypoints[12, 1])
 
     def set_relative_keypoints(self, keypoints):
-        keypoints =  keypoints[:, 0:2]
+        keypoints = keypoints[:, 0:2]
+
+        """
+        INVARIANT TO ROTATION
         rotation_matrix = [[np.cos(self.orientation), -np.sin(self.orientation)], [np.sin(self.orientation),
                                                                                    np.cos(self.orientation)]]
         for i in range(0, len(keypoints)):
             keypoints[i, :] = np.dot(rotation_matrix, keypoints[i,:])
+        """
+
         keypoints[:, 0] = keypoints[:, 0]-self.center_mass[0]
         keypoints[:, 1] = keypoints[:, 1]-self.center_mass[1]
 
@@ -56,7 +61,7 @@ def fit_model(bodys):
     sklearn_pca = PCA(n_components=7)
     sklearn_pca.fit(bodys)
     p = sklearn_pca.transform(bodys)
-    g = mixture.GaussianMixture(n_components=2)
+    g = mixture.GaussianMixture(n_components=10, max_iter=100)
     return g.fit(p)
 
 
@@ -64,10 +69,12 @@ def predict_model(list_bodies, model):
     sklearn_pca = PCA(n_components=7)
     sklearn_pca.fit(list_bodies)
     p = sklearn_pca.transform(list_bodies)
-    list     = model.fit_predict(p)
-
-    print(np.count_nonzero(list)/len(list_bodies))
-
+    coinfidence_list = model.predict_proba(p)
+    count =0
+    for coinfidence in coinfidence_list:
+        if max(coinfidence) < 0.99:
+            count += 1
+    print(count, " : ", len(coinfidence_list))
 
 def read_body_directory(in_path):
     body_list = []
@@ -95,7 +102,7 @@ if __name__ == '__main__':
     model = fit_model(list_bodies)
 
     list_bodies_predict = []
-    bodys = read_body_json('../examples/data/activity_modeling/c6-result.json')
+    bodys = read_body_json('../examples/data/activity_modeling/i1-result.json')
     for body in bodys:
         list_bodies_predict.append(body.keypoints.flatten())
     list_bodies_predict = np.vstack(list_bodies_predict)
