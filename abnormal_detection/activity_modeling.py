@@ -7,8 +7,9 @@ import numpy as np
 import os
 import json
 
-from sklearn import mixture
+from sklearn import mixture, neighbors, cluster
 from sklearn.decomposition import PCA
+
 
 from utils.eval import parse_keypoints_to_array
 
@@ -61,7 +62,8 @@ def fit_model(bodys):
     sklearn_pca = PCA(n_components=7)
     sklearn_pca.fit(bodys)
     p = sklearn_pca.transform(bodys)
-    g = mixture.GaussianMixture(n_components=10, max_iter=100)
+    g = mixture.GaussianMixture(n_components=10, max_iter=100, covariance_type='spherical')
+    g = mixture.BayesianGaussianMixture(n_components=10)
     return g.fit(p)
 
 
@@ -75,6 +77,7 @@ def predict_model(list_bodies, model):
         if max(coinfidence) < 0.99:
             count += 1
     print(count, " : ", len(coinfidence_list))
+
 
 def read_body_directory(in_path):
     body_list = []
