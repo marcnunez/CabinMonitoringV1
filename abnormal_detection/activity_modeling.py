@@ -10,8 +10,9 @@ import json
 from sklearn import mixture, neighbors, cluster
 from sklearn.decomposition import PCA
 
-
+from abnormal_detection.plot_model import plot_distribuition, visualize_3d_gmm, visualize_2D_gmm
 from utils.eval import parse_keypoints_to_array
+import matplotlib.pyplot as plt
 
 
 class BodyModel:
@@ -58,25 +59,18 @@ class BodyModel:
         return keypoints
 
 
-def fit_model(bodys):
-    sklearn_pca = PCA(n_components=7)
-    sklearn_pca.fit(bodys)
-    p = sklearn_pca.transform(bodys)
-    g = mixture.GaussianMixture(n_components=10, max_iter=100, covariance_type='spherical')
-    g = mixture.BayesianGaussianMixture(n_components=10)
-    return g.fit(p)
+def fit_model(bodys_to_fit_gmm, number_gaussian_components=4):
+    g = mixture.GaussianMixture(n_components=number_gaussian_components, max_iter=100, covariance_type='diag')
+    return g.fit(bodys_to_fit_gmm)
 
 
-def predict_model(list_bodies, model):
-    sklearn_pca = PCA(n_components=7)
-    sklearn_pca.fit(list_bodies)
-    p = sklearn_pca.transform(list_bodies)
-    coinfidence_list = model.predict_proba(p)
-    count =0
-    for coinfidence in coinfidence_list:
-        if max(coinfidence) < 0.99:
+def predict_model(bodys_to_predict_gmm, model_fitted):
+    list_fitted_bodys = model_fitted.predict_proba(bodys_to_predict_gmm)
+    count = 0
+    for coinfidence in list_fitted_bodys:
+        if max(coinfidence) < 0.60:
             count += 1
-    print(count, " : ", len(coinfidence_list))
+    return count
 
 
 def read_body_directory(in_path):
@@ -96,17 +90,87 @@ def read_body_json(json_path):
     return body_list
 
 
-if __name__ == '__main__':
-    list_bodies = []
-    bodys = read_body_json('../examples/data/activity_modeling/c6-result.json')
+def pca_predict(bodys, sklearn_pca):
+    list_pca_predict = []
     for body in bodys:
-        list_bodies.append(body.keypoints.flatten())
-    list_bodies = np.vstack(list_bodies)
-    model = fit_model(list_bodies)
+        list_pca_predict.append(body.keypoints.flatten())
+    list_pca_predict = np.vstack(list_pca_predict)
+    return sklearn_pca.transform(list_pca_predict)
 
-    list_bodies_predict = []
-    bodys = read_body_json('../examples/data/activity_modeling/i1-result.json')
+
+def pca_fit(bodys, pca_components):
+    pca_fit_list = []
     for body in bodys:
-        list_bodies_predict.append(body.keypoints.flatten())
-    list_bodies_predict = np.vstack(list_bodies_predict)
-    predict_model(list_bodies_predict, model)
+        pca_fit_list.append(body.keypoints.flatten())
+    list_bodies_predict = np.vstack(pca_fit_list)
+    sklearn_pca = PCA(n_components=pca_components)
+    sklearn_pca.fit(list_bodies_predict)
+    return sklearn_pca
+
+
+if __name__ == '__main__':
+    gaussian_components = 16
+    pca_components = 3
+    val1 = 3
+    if val1 == 1:
+
+        for i in range (1, 20):
+            gaussian_components = i*2
+            for pca_components in range (1, 20):
+
+                list_bodies = []
+                bodys = read_body_json('../examples/data/activity_modeling/c3-result.json')
+                for body in bodys:
+                    list_bodies.append(body.keypoints.flatten())
+                list_bodies = np.vstack(list_bodies)
+                model = fit_model(list_bodies, gaussian_components, pca_components)
+
+                list_bodies_predict = []
+                bodys = read_body_json('../examples/data/activity_modeling/i3-result.json')
+                for body in bodys:
+                    list_bodies_predict.append(body.keypoints.flatten())
+                list_bodies_predict = np.vstack(list_bodies_predict)
+                incorrects = predict_model(list_bodies_predict, model, pca_components)
+                print(incorrects, " : ", len(list_bodies_predict), " : ", gaussian_components, " : ", pca_components)
+    elif val1 == 2:
+        list_bodies = []
+        bodys = read_body_json('../examples/data/activity_modeling/c3-result.json')
+        for body in bodys:
+            list_bodies.append(body.keypoints.flatten())
+        list_bodies = np.vstack(list_bodies)
+        model = fit_model(list_bodies, gaussian_components, pca_components)
+
+        list_bodies_predict = []
+        bodys = read_body_json('../examples/data/activity_modeling/i3-result.json')
+        for body in bodys:
+            list_bodies_predict.append(body.keypoints.flatten())
+        list_bodies_predict = np.vstack(list_bodies_predict)
+        incorrects = predict_model(list_bodies_predict, model, pca_components)
+        print(incorrects, " : ", len(list_bodies_predict), " : ", gaussian_components, " : ", pca_components)
+    elif val1 == 3:
+
+        bodys = read_body_json('../examples/data/activity_modeling/c1-result.json')
+        bodys = bodys + read_body_json('../examples/data/activity_modeling/c3-result.json')
+        bodys = bodys + read_body_json('../examples/data/activity_modeling/c5-result.json')
+        bodys = bodys + read_body_json('../examples/data/activity_modeling/c6-result.json')
+        sklearn_pca = pca_fit(bodys, pca_components)
+        bodys_pca = pca_predict(bodys, sklearn_pca)
+
+        a = read_body_json('../examples/data/activity_modeling/c1-result.json')
+        a = pca_predict(a, sklearn_pca)
+        b = read_body_json('../examples/data/activity_modeling/c3-result.json')
+        b = pca_predict(b, sklearn_pca)
+        c = read_body_json('../examples/data/activity_modeling/c5-result.json')
+        c = pca_predict(c, sklearn_pca)
+        d = read_body_json('../examples/data/activity_modeling/c6-result.json')
+        d = pca_predict(d, sklearn_pca)
+
+        e = read_body_json('../examples/data/activity_modeling/s4-result.json')
+        e = pca_predict(e, sklearn_pca)
+
+
+        plot_distribuition(a,b,c,d)
+
+        fitted_gmm = fit_model(bodys_pca, 5)
+        visualize_2D_gmm(bodys_pca, fitted_gmm.weights_, fitted_gmm.means_.T, np.sqrt(fitted_gmm.covariances_).T)
+
