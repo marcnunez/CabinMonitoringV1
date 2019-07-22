@@ -22,6 +22,8 @@ parser.add_argument('--sp', default=False, action='store_true',
                     help='Use single process for pytorch')
 parser.add_argument('--profile', default=False, action='store_true',
                     help='add speed profiling at screen output')
+parser.add_argument('--pdf', default=False, type=bool,
+                    help='Evaluate probabilistic density function')
 
 "----------------------------- Model options -----------------------------"
 parser.add_argument('--netType', default='hgPRM', type=str,
@@ -145,6 +147,21 @@ parser.add_argument('--save_video', dest='save_video',
                     help='whether to save rendered video', default=False, action='store_true')
 parser.add_argument('--vis_fast', dest='vis_fast',
                     help='use fast rendering', action='store_true', default=False)
+
+
+"----------------------------- Eval options -----------------------------"
+parser.add_argument('--anotations', default='../examples/zoox/res/alphapose-results.json', type=str,
+                    help='Path to anotations ')
+parser.add_argument('--groundTruth', default='../examples/zoox/test/zoox-test2.json', type=str,
+                    help='Path to ground turth ')
+parser.add_argument('--debug_eval', default=False, type=bool,
+                    help='Print the debug information')
+parser.add_argument('--coco', default=False, type=bool,
+                    help='Test Cocos Dataset')
+parser.add_argument('--oksThreshold', default=0.5, type=float,
+                    help='Threshold between 0-1 of mimum OKS')
+parser.add_argument('--iouThreshold', default=0.5, type=float,
+                    help='Threshold between 0-1 of mimum IOU')
 opt = parser.parse_args()
 
 opt.num_classes = 80

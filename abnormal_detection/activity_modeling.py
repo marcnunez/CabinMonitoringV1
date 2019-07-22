@@ -7,12 +7,11 @@ import numpy as np
 import os
 import json
 
-from sklearn import mixture, neighbors, cluster
+from sklearn import mixture
 from sklearn.decomposition import PCA
 
-from abnormal_detection.plot_model import plot_distribuition, visualize_3d_gmm, visualize_2D_gmm
+from abnormal_detection.plot_model import plot_distribuition, visualize_2D_gmm
 from utils.eval import parse_keypoints_to_array
-import matplotlib.pyplot as plt
 
 
 class BodyModel:
@@ -88,6 +87,18 @@ def read_body_json(json_path):
         for anotation in data:
             body_list.append(BodyModel(anotation['image_id'], anotation['keypoints']))
     return body_list
+
+
+def demo_webcam_wraper(results):
+    body_list = []
+    id_img = results['imgname']
+    for sk in results['result']:
+        keypoints = sk['keypoints'].numpy()
+        body_list.append(BodyModel(id_img, keypoints))
+    """
+    pca_list = pca_fit(body_list, TODO)
+    predict_model(pca_list, TODO)
+    """
 
 
 def pca_predict(bodys, sklearn_pca):

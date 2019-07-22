@@ -1,4 +1,5 @@
 import argparse
+from opt import opt
 
 import numpy as np
 import json
@@ -9,25 +10,7 @@ from functional import seq
 from .model.rectangle import Rectangle, compute_bb
 from .plot_results import plot_boxes
 from .model.results import Result
-
-
-parser = argparse.ArgumentParser(description='PyTorch CabinMonitoringV1 Evaluation')
-
-"----------------------------- General options -----------------------------"
-parser.add_argument('--anotations', default='../examples/zoox/res/alphapose-results.json', type=str,
-                    help='Path to anotations ')
-parser.add_argument('--groundTruth', default='../examples/zoox/test/zoox-test2.json', type=str,
-                    help='Path to ground turth ')
-parser.add_argument('--debug', default=False, type=bool,
-                    help='Print the debug information')
-parser.add_argument('--coco', default=False, type=bool,
-                    help='Test Cocos Dataset')
-parser.add_argument('--oksThreshold', default=0.5, type=float,
-                    help='Threshold between 0-1 of mimum OKS')
-parser.add_argument('--iouThreshold', default=0.5, type=float,
-                    help='Threshold between 0-1 of mimum IOU')
-
-opt = parser.parse_args()
+from opt import opt
 
 
 # Evaluate mean OKS of those skeletons that have an IOU over a threshold
@@ -61,7 +44,7 @@ def eval_oks_iou():
                     rectangle_gt = compute_bb(keypoints_gt)
                     iou = rectangle.iou(rectangle_gt)
 
-                    if opt.debug:
+                    if opt.debug_eval:
                         path_image = os.path.join("../examples/zoox/res/vis", anotation['image_id'])
                         plot_boxes(path_image, rectangle, rectangle_gt)
 
@@ -180,22 +163,25 @@ def eval_mAP_oks(gt, det) -> Result:
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array
 def parse_keypoints_to_array(keypoints) -> np.array:
-    counter = 1
-    index = 0
-    out = np.zeros((17, 3))
-    for keypoint in keypoints:
-        # Get X's keypoinys
-        if ((counter+2) % 3) == 0:
-            out[index, 0] = keypoint
-        # Get Y's keypoinys
-        elif ((counter+1) % 3) == 0:
-            out[index, 1] = keypoint
-        # Get coinfidence
-        else:
-            out[index, 2] = keypoint
-            index += 1
-        counter += 1
-    return out
+    if len(keypoints) != 17:
+        counter = 1
+        index = 0
+        out = np.zeros((17, 3))
+        for keypoint in keypoints:
+            # Get X's keypoinys
+            if ((counter+2) % 3) == 0:
+                out[index, 0] = keypoint
+            # Get Y's keypoinys
+            elif ((counter+1) % 3) == 0:
+                out[index, 1] = keypoint
+            # Get coinfidence
+            else:
+                out[index, 2] = keypoint
+                index += 1
+            counter += 1
+        return out
+    else:
+        return keypoints
 
 
 # Parse Keypoints from 51 by 1 list to 17 by 3 numpy array

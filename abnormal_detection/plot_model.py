@@ -84,7 +84,7 @@ def plot_sphere(w=0, c=[0,0,0], r=[1, 1, 1], subdev=10, ax=None, sigma_multiplie
     pi = np.pi
     cos = np.cos
     sin = np.sin
-    phi, theta = np.mgrid[0.0:pi:complex(0,subdev), 0.0:2.0 * pi:complex(0,subdev)]
+    phi, theta = np.mgrid[0.0:pi:complex(0, subdev), 0.0:2.0 * pi:complex(0, subdev)]
     x = sigma_multiplier*r[0] * sin(phi) * cos(theta) + c[0]
     y = sigma_multiplier*r[1] * sin(phi) * sin(theta) + c[1]
     z = sigma_multiplier*r[2] * cos(phi) + c[2]
