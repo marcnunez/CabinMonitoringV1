@@ -69,8 +69,8 @@ def demo_webcam_wraper(results):
         body_list.append(BodyModel(id_img, keypoints))
 
         pca_bodys = pca_predict(body_list, pca_fit)
-
-        if predict_model(pca_bodys, gmm_fit) !=0:
+        wrong_beheivours = predict_model(pca_bodys, gmm_fit)
+        if wrong_beheivours !=0:
             print("There is something Wrong, maybe :P")
 
 
@@ -85,10 +85,10 @@ def predict_model(bodys_to_predict_gmm, model_fitted):
 
 @memory.cache()
 def fit_model():
-    list_bodys = read_body_json('../examples/data/activity_modeling/c1-result.json') + \
-                 read_body_json('../examples/data/activity_modeling/c6-result.json') + \
-                 read_body_json('../examples/data/activity_modeling/c3-result.json') + \
-                 read_body_json('../examples/data/activity_modeling/c5-result.json')
+    list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c6-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c3-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c5-result.json')
     pca_fit_list = []
     for human in list_bodys:
         pca_fit_list.append(human.keypoints.flatten())
@@ -134,21 +134,21 @@ def read_body_json(json_path):
 if __name__ == '__main__':
         pca_fit, gmm_fit = fit_model()
 
-        a = read_body_json('../examples/data/activity_modeling/c1-result.json')
+        a = read_body_json('examples/data/activity_modeling/c1-result.json')
         a = pca_predict(a, pca_fit)
-        b = read_body_json('../examples/data/activity_modeling/c3-result.json')
+        b = read_body_json('examples/data/activity_modeling/c3-result.json')
         b = pca_predict(b, pca_fit)
-        c = read_body_json('../examples/data/activity_modeling/c5-result.json')
+        c = read_body_json('examples/data/activity_modeling/c5-result.json')
         c = pca_predict(c, pca_fit)
-        d = read_body_json('../examples/data/activity_modeling/c6-result.json')
+        d = read_body_json('examples/data/activity_modeling/c6-result.json')
         d = pca_predict(d, pca_fit)
-        e = read_body_json('../examples/data/activity_modeling/s4-result.json')
+        e = read_body_json('examples/data/activity_modeling/s4-result.json')
         e = pca_predict(e, pca_fit)
 
-        list_bodys = read_body_json('../examples/data/activity_modeling/c1-result.json') + \
-                     read_body_json('../examples/data/activity_modeling/c6-result.json') + \
-                     read_body_json('../examples/data/activity_modeling/c3-result.json') + \
-                     read_body_json('../examples/data/activity_modeling/c5-result.json')
+        list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
+                     read_body_json('examples/data/activity_modeling/c6-result.json') + \
+                     read_body_json('examples/data/activity_modeling/c3-result.json') + \
+                     read_body_json('examples/data/activity_modeling/c5-result.json')
 
         list_bodys = pca_predict(list_bodys, pca_fit)
         print(predict_model(e, gmm_fit))

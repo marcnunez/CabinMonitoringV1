@@ -6,7 +6,7 @@ from model.anotations import Anotations
 import os
 import json
 import cv2
-
+import numpy as np
 
 def fix_json_format(in_path):
     with open(in_path) as json_file:
@@ -120,5 +120,7 @@ if __name__ == '__main__':
     anotate_frame('../examples/zoox/test/anotations2', '../examples/zoox/test/frames2')
     fix_json_format_full_directory('../examples/zoox/test/anotations2')
     merge_json('../examples/zoox/test/anotations2', '../examples/zoox/test/zoox-test2.json')  
-    """
+   
     anotate_frame('../examples/dummy/anotations', '../examples/dummy/frames')
+    """
+    roi_crop_video('../examples/data/cabin/videos/p')

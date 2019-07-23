@@ -1,3 +1,4 @@
+from activity_modeling import demo_webcam_wraper
 from opt import opt
 
 from dataloader import ImageLoader, DetectionLoader, DetectionProcessor, DataWriter, Mscoco
@@ -65,6 +66,7 @@ if __name__ == "__main__":
     data_len = data_loader.length()
     im_names_desc = tqdm(range(data_len))
 
+    aux_counter_pdf = 1024
     batchSize = args.posebatch
     for i in im_names_desc:
         start_time = getTime()
@@ -96,7 +98,12 @@ if __name__ == "__main__":
 
             ckpt_time, post_time = getTime(ckpt_time)
             runtime_profile['pn'].append(post_time)
-        
+
+            length_results = len(writer.final_result)
+            if opt.pdf & length_results != 0 & length_results != aux_counter_pdf:
+                aux_counter_pdf = length_results
+                demo_webcam_wraper(writer.final_result[-1])
+
         if args.profile:
             # TQDM
             im_names_desc.set_description(
