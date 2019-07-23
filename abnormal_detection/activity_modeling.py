@@ -12,6 +12,8 @@ from sklearn.decomposition import PCA
 
 from abnormal_detection.plot_model import plot_distribuition, visualize_2D_gmm
 from utils.eval import parse_keypoints_to_array
+from utils.memory import memory
+from opt import opt
 
 
 class BodyModel:
@@ -58,9 +60,19 @@ class BodyModel:
         return keypoints
 
 
-def fit_model(bodys_to_fit_gmm, number_gaussian_components=4):
-    g = mixture.GaussianMixture(n_components=number_gaussian_components, max_iter=100, covariance_type='diag')
-    return g.fit(bodys_to_fit_gmm)
+def demo_webcam_wraper(results):
+    body_list = []
+    id_img = results['imgname']
+    for sk in results['result']:
+        keypoints = sk['keypoints'].numpy()
+        body_list.append(BodyModel(id_img, keypoints))
+
+    fit_model()
+    """
+    pca_list = pca_fit(body_list, TODO)
+    predict_model(pca_list, TODO)
+    """
+
 
 
 def predict_model(bodys_to_predict_gmm, model_fitted):
@@ -70,6 +82,48 @@ def predict_model(bodys_to_predict_gmm, model_fitted):
         if max(coinfidence) < 0.60:
             count += 1
     return count
+
+
+@memory.cache()
+def fit_model():
+    list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c6-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c3-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c5-result.json')
+    pca_fit_list = []
+    for human in list_bodys:
+        pca_fit_list.append(human.keypoints.flatten())
+    list_bodies_stacked = np.vstack(pca_fit_list)
+    sklearn_pca_fitted = PCA(n_components=opt.pca)
+    sklearn_pca_fitted.fit(list_bodies_stacked)
+
+    list_pca_predict = []
+    for body in list_bodys:
+        list_pca_predict.append(body.keypoints.flatten())
+    list_pca_predict = np.vstack(list_pca_predict)
+    sklearn_pca_fitted.transform(list_pca_predict)
+
+    g = mixture.GaussianMixture(n_components=opt.clusters, max_iter=100, covariance_type='diag')
+    return g.fit(list_pca_predict)
+
+
+def pca_predict(bodys, sklearn_pca):
+    list_pca_predict = []
+    for body in bodys:
+        list_pca_predict.append(body.keypoints.flatten())
+    list_pca_predict = np.vstack(list_pca_predict)
+    return sklearn_pca.transform(list_pca_predict)
+
+
+@memory.cache()
+def pca_fit(list_bodys):
+    pca_fit_list = []
+    for human in list_bodys:
+        pca_fit_list.append(human.keypoints.flatten())
+    list_bodies_stacked = np.vstack(pca_fit_list)
+    sklearn_pca_fitted = PCA(n_components=opt.pca)
+    sklearn_pca_fitted.fit(list_bodies_stacked)
+    return sklearn_pca_fitted
 
 
 def read_body_directory(in_path):
@@ -88,37 +142,7 @@ def read_body_json(json_path):
             body_list.append(BodyModel(anotation['image_id'], anotation['keypoints']))
     return body_list
 
-
-def demo_webcam_wraper(results):
-    body_list = []
-    id_img = results['imgname']
-    for sk in results['result']:
-        keypoints = sk['keypoints'].numpy()
-        body_list.append(BodyModel(id_img, keypoints))
-    """
-    pca_list = pca_fit(body_list, TODO)
-    predict_model(pca_list, TODO)
-    """
-
-
-def pca_predict(bodys, sklearn_pca):
-    list_pca_predict = []
-    for body in bodys:
-        list_pca_predict.append(body.keypoints.flatten())
-    list_pca_predict = np.vstack(list_pca_predict)
-    return sklearn_pca.transform(list_pca_predict)
-
-
-def pca_fit(bodys, pca_components):
-    pca_fit_list = []
-    for body in bodys:
-        pca_fit_list.append(body.keypoints.flatten())
-    list_bodies_predict = np.vstack(pca_fit_list)
-    sklearn_pca = PCA(n_components=pca_components)
-    sklearn_pca.fit(list_bodies_predict)
-    return sklearn_pca
-
-
+"""
 if __name__ == '__main__':
     gaussian_components = 16
     pca_components = 3
@@ -159,13 +183,12 @@ if __name__ == '__main__':
         incorrects = predict_model(list_bodies_predict, model, pca_components)
         print(incorrects, " : ", len(list_bodies_predict), " : ", gaussian_components, " : ", pca_components)
     elif val1 == 3:
-
-        bodys = read_body_json('../examples/data/activity_modeling/c1-result.json')
-        bodys = bodys + read_body_json('../examples/data/activity_modeling/c3-result.json')
-        bodys = bodys + read_body_json('../examples/data/activity_modeling/c5-result.json')
-        bodys = bodys + read_body_json('../examples/data/activity_modeling/c6-result.json')
-        sklearn_pca = pca_fit(bodys, pca_components)
-        bodys_pca = pca_predict(bodys, sklearn_pca)
+        list_bodys = read_body_json('../examples/data/activity_modeling/c1-result.json') + \
+                     read_body_json('../examples/data/activity_modeling/c6-result.json') + \
+                     read_body_json('../examples/data/activity_modeling/c3-result.json') + \
+                     read_body_json('../examples/data/activity_modeling/c5-result.json')
+        sklearn_pca = pca_fit(list_bodys)
+        bodys_pca = pca_predict(list_bodys, sklearn_pca)
 
         a = read_body_json('../examples/data/activity_modeling/c1-result.json')
         a = pca_predict(a, sklearn_pca)
@@ -184,4 +207,4 @@ if __name__ == '__main__':
 
         fitted_gmm = fit_model(bodys_pca, 5)
         visualize_2D_gmm(bodys_pca, fitted_gmm.weights_, fitted_gmm.means_.T, np.sqrt(fitted_gmm.covariances_).T)
-
+"""

@@ -162,6 +162,14 @@ parser.add_argument('--oksThreshold', default=0.5, type=float,
                     help='Threshold between 0-1 of mimum OKS')
 parser.add_argument('--iouThreshold', default=0.5, type=float,
                     help='Threshold between 0-1 of mimum IOU')
+
+
+"----------------------------- PDF options -----------------------------"
+parser.add_argument('--pca', type=int, default=3,
+                    help='Dimensions of embeded space')
+parser.add_argument('--clusters', type=int, default=5,
+                    help='Number of probabilistic density functions')
+
 opt = parser.parse_args()
 
 opt.num_classes = 80
