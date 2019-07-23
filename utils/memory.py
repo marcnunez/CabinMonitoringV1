@@ -1,4 +1,4 @@
 from joblib import Memory
 
-location = '../.cache'
+location = '.cache'
 memory = Memory(location, verbose=0)

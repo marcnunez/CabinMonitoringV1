@@ -43,4 +43,4 @@ venv/
 train_sppe/data/*
 *.pkl
 *.avi
-
+*.cache
