@@ -1,7 +1,5 @@
-from opt import opt
-
 from dataloader_webcam import WebcamLoader, DetectionLoader, DetectionProcessor, DataWriter, Mscoco
-from abnormal_detection.activity_modeling import demo_webcam_wraper
+from activity_modeling import demo_webcam_wraper
 
 from SPPE.src.main_fast_inference import *
 

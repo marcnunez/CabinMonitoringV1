@@ -11,7 +11,7 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-
+import cv2
 
 def plot_distribuition(data1, data2, data3=0, data4=0):
     fig = plt.figure()
@@ -96,7 +96,7 @@ def plot_sphere(w=0, c=[0,0,0], r=[1, 1, 1], subdev=10, ax=None, sigma_multiplie
 
     return ax
 
-def visualize_2D_gmm(points, w, mu, stdev, export=True):
+def visualize_2D_gmm(points, w, mu, stdev, export=False):
     '''
     plots points and their corresponding gmm model in 2D
     Input:
@@ -130,4 +130,13 @@ def visualize_2D_gmm(points, w, mu, stdev, export=True):
         plt.savefig('images/2D_GMM_demonstration.png', dpi=100, format='png')
 
     plt.show()
+
+
+def plot_boxes(path_image, bb_detect, bb_gt):
+    image = cv2.imread(path_image)
+    cv2.rectangle(image, bb_detect.parse_int(bb_detect.top_left), bb_detect.parse_int(bb_detect.get_bottom_right()), (0, 255, 0))
+    cv2.rectangle(image, bb_detect.parse_int(bb_gt.top_left), bb_detect.parse_int(bb_gt.get_bottom_right()), (255, 0, 0))
+    cv2.imshow("Boundig Box (Green Detect, Red GT)", image)
+    cv2.waitKey(1)
+
 

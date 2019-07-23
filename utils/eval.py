@@ -1,5 +1,4 @@
-import argparse
-from opt import opt
+from utils.plot_model import plot_boxes
 
 import numpy as np
 import json
@@ -7,8 +6,7 @@ import os
 import statistics
 
 from functional import seq
-from .model.rectangle import Rectangle, compute_bb
-from .plot_results import plot_boxes
+from .model.rectangle import compute_bb
 from .model.results import Result
 from opt import opt
 

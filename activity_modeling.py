@@ -10,7 +10,6 @@ import json
 from sklearn import mixture
 from sklearn.decomposition import PCA
 
-from abnormal_detection.plot_model import plot_distribuition, visualize_2D_gmm
 from utils.eval import parse_keypoints_to_array
 from utils.memory import memory
 from opt import opt
@@ -63,21 +62,24 @@ class BodyModel:
 def demo_webcam_wraper(results):
     body_list = []
     id_img = results['imgname']
+    pca_fit, gmm_fit = fit_model()
+
     for sk in results['result']:
         keypoints = sk['keypoints'].numpy()
         body_list.append(BodyModel(id_img, keypoints))
 
-    pca_fit, gmm_fit = fit_model()
-    pca_bodys = pca_predict(body_list, pca_fit)
-    print(predict_model(pca_bodys, gmm_fit))
+        pca_bodys = pca_predict(body_list, pca_fit)
+
+        if predict_model(pca_bodys, gmm_fit) !=0:
+            print("There is something Wrong, maybe :P")
 
 
 def predict_model(bodys_to_predict_gmm, model_fitted):
-    list_fitted_bodys = model_fitted.predict_proba(bodys_to_predict_gmm)
+    list_fitted_bodys = model_fitted.predict(bodys_to_predict_gmm)
     count = 0
-    for coinfidence in list_fitted_bodys:
-        if max(coinfidence) < 0.60:
-            count += 1
+    for index in list_fitted_bodys:
+        if index == 4:
+            count +=1
     return count
 
 
@@ -140,11 +142,18 @@ if __name__ == '__main__':
         c = pca_predict(c, pca_fit)
         d = read_body_json('../examples/data/activity_modeling/c6-result.json')
         d = pca_predict(d, pca_fit)
-
         e = read_body_json('../examples/data/activity_modeling/s4-result.json')
         e = pca_predict(e, pca_fit)
 
+        list_bodys = read_body_json('../examples/data/activity_modeling/c1-result.json') + \
+                     read_body_json('../examples/data/activity_modeling/c6-result.json') + \
+                     read_body_json('../examples/data/activity_modeling/c3-result.json') + \
+                     read_body_json('../examples/data/activity_modeling/c5-result.json')
 
+        list_bodys = pca_predict(list_bodys, pca_fit)
+        print(predict_model(e, gmm_fit))
+        """
         plot_distribuition(a,b,c,d)
 
-        visualize_2D_gmm(e, gmm_fit.weights_, gmm_fit.means_.T, np.sqrt(gmm_fit.covariances_).T)
+        visualize_2D_gmm(list_bodys, gmm_fit.weights_, gmm_fit.means_.T, np.sqrt(gmm_fit.covariances_).T)
+        """
