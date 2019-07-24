@@ -13,6 +13,7 @@ from sklearn.decomposition import PCA
 from utils.eval import parse_keypoints_to_array
 from utils.memory import memory
 from opt import opt
+from utils.plot_model import plot_distribuition, visualize_2D_gmm
 
 
 class BodyModel:
@@ -86,9 +87,12 @@ def predict_model(bodys_to_predict_gmm, model_fitted):
 @memory.cache()
 def fit_model():
     list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
-                 read_body_json('examples/data/activity_modeling/c6-result.json') + \
                  read_body_json('examples/data/activity_modeling/c3-result.json') + \
-                 read_body_json('examples/data/activity_modeling/c5-result.json')
+                 read_body_json('examples/data/activity_modeling/c5-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c6-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c7-result.json') + \
+                 read_body_json('examples/data/activity_modeling/s4-result.json')
+
     pca_fit_list = []
     for human in list_bodys:
         pca_fit_list.append(human.keypoints.flatten())
@@ -146,14 +150,21 @@ if __name__ == '__main__':
         e = pca_predict(e, pca_fit)
 
         list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
-                     read_body_json('examples/data/activity_modeling/c6-result.json') + \
                      read_body_json('examples/data/activity_modeling/c3-result.json') + \
-                     read_body_json('examples/data/activity_modeling/c5-result.json')
+                     read_body_json('examples/data/activity_modeling/c5-result.json') + \
+                     read_body_json('examples/data/activity_modeling/c6-result.json') + \
+                     read_body_json('examples/data/activity_modeling/c7-result.json') + \
+                     read_body_json('examples/data/activity_modeling/c8-result.json') + \
+                     read_body_json('examples/data/activity_modeling/i1-result.json') + \
+                     read_body_json('examples/data/activity_modeling/i2-result.json') + \
+                     read_body_json('examples/data/activity_modeling/i3-result.json') + \
+                     read_body_json('examples/data/activity_modeling/s2-result.json') + \
+                     read_body_json('examples/data/activity_modeling/s3-result.json') + \
+                     read_body_json('examples/data/activity_modeling/s4-result.json')
 
         list_bodys = pca_predict(list_bodys, pca_fit)
         print(predict_model(e, gmm_fit))
-        """
-        plot_distribuition(a,b,c,d)
+
+        plot_distribuition(list_bodys)
 
         visualize_2D_gmm(list_bodys, gmm_fit.weights_, gmm_fit.means_.T, np.sqrt(gmm_fit.covariances_).T)
-        """
