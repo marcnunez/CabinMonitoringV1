@@ -167,8 +167,10 @@ parser.add_argument('--iouThreshold', default=0.5, type=float,
 "----------------------------- PDF options -----------------------------"
 parser.add_argument('--pca', type=int, default=3,
                     help='Dimensions of embeded space')
-parser.add_argument('--clusters', type=int, default=20,
+parser.add_argument('--clusters', type=int, default=5,
                     help='Number of probabilistic density functions')
+parser.add_argument('--resultName', type=str, default='positive',
+                    help='Name of the Json output result')
 
 opt = parser.parse_args()
 

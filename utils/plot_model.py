@@ -18,12 +18,12 @@ def plot_distribuition(data1, data2=0, data3=0, data4=0):
 
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.scatter(data1[:, 0], data1[:, 1], data1[:, 2], marker='o')
-    """
-    ax.scatter(data2[:, 0], data2[:, 1], data2[:, 2], marker='^')
-    ax.scatter(data3[:, 0], data3[:, 1], data3[:, 2], marker='p')
-    ax.scatter(data4[:, 0], data4[:, 1], data4[:, 2], marker='h')
-    """
+    ax.scatter(data1[:, 0], data1[:, 1], data1[:, 2], marker='.')
+    ax.scatter(data2[:, 0], data2[:, 1], data2[:, 2], marker='x')
+
+    ax.scatter(data3[:, 0], data3[:, 1], data3[:, 2], marker='o')
+    ax.scatter(data4[:, 0], data4[:, 1], data4[:, 2], marker='X')
+
 
     plt.show()
 
@@ -131,6 +131,7 @@ def visualize_2D_gmm(points, w, mu, stdev, export=False):
         plt.savefig('images/2D_GMM_demonstration.png', dpi=100, format='png')
 
     plt.show()
+
 
 
 def plot_boxes(path_image, bb_detect, bb_gt):

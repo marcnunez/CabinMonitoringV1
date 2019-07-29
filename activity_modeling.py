@@ -85,19 +85,25 @@ def predict_model(bodys_to_predict_gmm, model_fitted):
 
 
 @memory.cache()
-def fit_model():
+def fit_model(pca_components=opt.pca, model_components=opt.clusters):
     list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
                  read_body_json('examples/data/activity_modeling/c3-result.json') + \
                  read_body_json('examples/data/activity_modeling/c5-result.json') + \
                  read_body_json('examples/data/activity_modeling/c6-result.json') + \
                  read_body_json('examples/data/activity_modeling/c7-result.json') + \
+                 read_body_json('examples/data/activity_modeling/c8-result.json') + \
+                 read_body_json('examples/data/activity_modeling/i1-result.json') + \
+                 read_body_json('examples/data/activity_modeling/i2-result.json') + \
+                 read_body_json('examples/data/activity_modeling/i3-result.json') + \
+                 read_body_json('examples/data/activity_modeling/s2-result.json') + \
+                 read_body_json('examples/data/activity_modeling/s3-result.json') + \
                  read_body_json('examples/data/activity_modeling/s4-result.json')
 
     pca_fit_list = []
     for human in list_bodys:
         pca_fit_list.append(human.keypoints.flatten())
     list_bodies_stacked = np.vstack(pca_fit_list)
-    sklearn_pca_fitted = PCA(n_components=opt.pca)
+    sklearn_pca_fitted = PCA(n_components=pca_components)
     sklearn_pca_fitted.fit(list_bodies_stacked)
 
     list_pca_predict = []
@@ -106,7 +112,7 @@ def fit_model():
     list_pca_predict = np.vstack(list_pca_predict)
     list_fitted = sklearn_pca_fitted.transform(list_pca_predict)
 
-    g = mixture.GaussianMixture(n_components=opt.clusters, max_iter=100, covariance_type='diag')
+    g = mixture.GaussianMixture(n_components=model_components, max_iter=100, covariance_type='diag')
     return sklearn_pca_fitted, g.fit(list_fitted)
 
 
@@ -137,7 +143,7 @@ def read_body_json(json_path):
 
 if __name__ == '__main__':
         pca_fit, gmm_fit = fit_model()
-
+        """
         a = read_body_json('examples/data/activity_modeling/c1-result.json')
         a = pca_predict(a, pca_fit)
         b = read_body_json('examples/data/activity_modeling/c3-result.json')
@@ -148,23 +154,19 @@ if __name__ == '__main__':
         d = pca_predict(d, pca_fit)
         e = read_body_json('examples/data/activity_modeling/s4-result.json')
         e = pca_predict(e, pca_fit)
+        """
+        list_bodys_positive = read_body_json('examples/data/activity_modeling/images/train_processed/positive-result.json')
+        list_bodys_negative = read_body_json('examples/data/activity_modeling/images/train_processed/negative-result.json')
 
-        list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
-                     read_body_json('examples/data/activity_modeling/c3-result.json') + \
-                     read_body_json('examples/data/activity_modeling/c5-result.json') + \
-                     read_body_json('examples/data/activity_modeling/c6-result.json') + \
-                     read_body_json('examples/data/activity_modeling/c7-result.json') + \
-                     read_body_json('examples/data/activity_modeling/c8-result.json') + \
-                     read_body_json('examples/data/activity_modeling/i1-result.json') + \
-                     read_body_json('examples/data/activity_modeling/i2-result.json') + \
-                     read_body_json('examples/data/activity_modeling/i3-result.json') + \
-                     read_body_json('examples/data/activity_modeling/s2-result.json') + \
-                     read_body_json('examples/data/activity_modeling/s3-result.json') + \
-                     read_body_json('examples/data/activity_modeling/s4-result.json')
+        list_bodys_positive = pca_predict(list_bodys_positive, pca_fit)
+        list_bodys_negative = pca_predict(list_bodys_negative, pca_fit)
 
-        list_bodys = pca_predict(list_bodys, pca_fit)
-        print(predict_model(e, gmm_fit))
+        list_bodys_positive2 = read_body_json('examples/data/activity_modeling/images/test_processed/positive-result.json')
+        list_bodys_negative2 = read_body_json('examples/data/activity_modeling/images/test_processed/negative-result.json')
 
-        plot_distribuition(list_bodys)
+        list_bodys_positive2 = pca_predict(list_bodys_positive2, pca_fit)
+        list_bodys_negative2 = pca_predict(list_bodys_negative2, pca_fit)
 
-        visualize_2D_gmm(list_bodys, gmm_fit.weights_, gmm_fit.means_.T, np.sqrt(gmm_fit.covariances_).T)
+        plot_distribuition(list_bodys_positive, list_bodys_negative, list_bodys_positive2, list_bodys_negative2)
+
+        visualize_2D_gmm(list_bodys_positive, gmm_fit.weights_, gmm_fit.means_.T, np.sqrt(gmm_fit.covariances_).T)
