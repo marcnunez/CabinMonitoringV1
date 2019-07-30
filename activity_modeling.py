@@ -61,9 +61,8 @@ class BodyModel:
             keypoints[i, :] = np.dot(rotation_matrix, keypoints[i,:])
         """
 
-        keypoints[:, 0] = keypoints[:, 0]-self.mid_center_mass[0]
-        keypoints[:, 1] = keypoints[:, 1]-self.mid_center_mass[1]
-
+        keypoints[:, 0] = keypoints[:, 0]-self.upper_center_mass[0]
+        keypoints[:, 1] = keypoints[:, 1]-self.upper_center_mass[1]
 
         xmax = np.max((keypoints[:, 0]))
         xmin = np.min((keypoints[:, 0]))
@@ -101,7 +100,7 @@ def predict_model(bodys_to_predict_gmm, model_fitted):
     return
 
 
-@memory.cache()
+#@memory.cache()
 def fit_model(pca_components=opt.pca, model_components=opt.clusters):
     list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
                  read_body_json('examples/data/activity_modeling/c3-result.json') + \
@@ -198,16 +197,19 @@ if __name__ == '__main__':
     bodys2 = read_body_json('examples/data/activity_modeling/images/test_processed/full-result.json')
     for pca_dimensions in range(3, 15):
         for gmm_clusters in range(3, 15):
-            pca_fit, gmm_fit = fit_model(pca_dimensions, gmm_clusters)
+            list_results = np.zeros((20, 1))
+            for iteration in range(0, 20):
+                pca_fit, gmm_fit = fit_model(pca_dimensions, gmm_clusters)
 
-            keypoints_pca = pca_predict(bodys, pca_fit)
-            keypoints_pca2 = pca_predict(bodys2, pca_fit)
+                keypoints_pca = pca_predict(bodys, pca_fit)
+                keypoints_pca2 = pca_predict(bodys2, pca_fit)
 
-            fitted_train = gmm_fit.predict(keypoints_pca)
-            fitted_test = gmm_fit.predict(keypoints_pca2)
+                fitted_train = gmm_fit.predict(keypoints_pca)
+                fitted_test = gmm_fit.predict(keypoints_pca2)
 
-            behaivour_dict = set_gaussian_beaheivours(fitted_train, bodys)
+                behaivour_dict = set_gaussian_beaheivours(fitted_train, bodys)
 
-            res = evaluate_test(fitted_test, bodys2, behaivour_dict)
-
-            print("PCA: " + str(pca_dimensions) + " GMM: " + str(gmm_clusters) + " F1: " + str(res.get_f1_score()))
+                res = evaluate_test(fitted_test, bodys2, behaivour_dict)
+                list_results[iteration] = res.get_f1_score()
+            print("PCA: " + str(pca_dimensions) + " GMM: " + str(gmm_clusters) + " F1 AVG: " +
+                  str(round(list_results.mean(), 4)) + " F1 VAR: " + str(round(list_results.var(), 4)))
