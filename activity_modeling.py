@@ -13,6 +13,7 @@ from sklearn.decomposition import PCA
 from utils.eval import parse_keypoints_to_array
 from utils.memory import memory
 from opt import opt
+from utils.model.results import Result
 from utils.plot_model import plot_distribuition, visualize_2D_gmm
 
 
@@ -21,14 +22,28 @@ class BodyModel:
     def __init__(self, image_id: str, keypoints):
         self.image_id = image_id
         keypoints = parse_keypoints_to_array(keypoints)
-        self.center_mass = self.set_center_mass(keypoints)
+        self.upper_center_mass = self.set_upper_center_mass(keypoints)
+        self.lower_center_mass = self.set_lower_center_mass(keypoints)
+        self.mid_center_mass = self.set_mid_center_mass()
         self.orientation = self.set_orientation(keypoints)
         self.keypoints = self.set_relative_keypoints(keypoints)
         self.original_keypoints = keypoints[:, 0:2]
+        self.is_abnormal = self.mark_abnormal_beheaivour(image_id)
 
     @staticmethod
-    def set_center_mass(keypoints):
+    def mark_abnormal_beheaivour(image_id:str) -> bool:
+        return image_id.startswith('i')
+
+    @staticmethod
+    def set_upper_center_mass(keypoints):
+        return (keypoints[5, 0]+keypoints[6, 0])/2, (keypoints[5, 1]+keypoints[6, 1])/2
+
+    @staticmethod
+    def set_lower_center_mass(keypoints):
         return (keypoints[11, 0]+keypoints[12, 0])/2, (keypoints[11, 1]+keypoints[12, 1])/2
+
+    def set_mid_center_mass(self):
+        return (self.upper_center_mass[0] + self.lower_center_mass[0]) / 2, (self.upper_center_mass[1] + self.lower_center_mass[1]) / 2
 
     @staticmethod
     def set_orientation(keypoints):
@@ -37,16 +52,18 @@ class BodyModel:
     def set_relative_keypoints(self, keypoints):
         keypoints = keypoints[:, 0:2]
 
+
         """
-        INVARIANT TO ROTATION
+        #INVARIANT TO ROTATION
         rotation_matrix = [[np.cos(self.orientation), -np.sin(self.orientation)], [np.sin(self.orientation),
                                                                                    np.cos(self.orientation)]]
         for i in range(0, len(keypoints)):
             keypoints[i, :] = np.dot(rotation_matrix, keypoints[i,:])
         """
 
-        keypoints[:, 0] = keypoints[:, 0]-self.center_mass[0]
-        keypoints[:, 1] = keypoints[:, 1]-self.center_mass[1]
+        keypoints[:, 0] = keypoints[:, 0]-self.mid_center_mass[0]
+        keypoints[:, 1] = keypoints[:, 1]-self.mid_center_mass[1]
+
 
         xmax = np.max((keypoints[:, 0]))
         xmin = np.min((keypoints[:, 0]))
@@ -81,7 +98,7 @@ def predict_model(bodys_to_predict_gmm, model_fitted):
     for index in list_fitted_bodys:
         if index == 4:
             count +=1
-    return count
+    return
 
 
 @memory.cache()
@@ -141,32 +158,56 @@ def read_body_json(json_path):
     return body_list
 
 
+def set_gaussian_beaheivours(fitted_train, bodys):
+    dict_abnormal = {}
+    out_dict = {}
+    dict_total= {}
+    for i in range(0, gmm_fit.n_components):
+        dict_abnormal[i] = 0
+        dict_total[i] = 0
+        out_dict[i] = False
+    for i in range(len(fitted_train)):
+        if bodys[i].is_abnormal:
+            dict_abnormal[fitted_train[i]] = dict_abnormal[fitted_train[i]] + 1
+        dict_total[fitted_train[i]] = dict_total[fitted_train[i]] + 1
+    for i in range(len(dict_abnormal)):
+        if dict_abnormal[i] > dict_total[i]/2:
+            out_dict[i] = True
+    return out_dict
+
+
+def evaluate_test(fitted_test, bodys2, behaivour_dict) -> Result:
+    res = Result()
+
+    for i in range(len(fitted_test)):
+        if behaivour_dict[fitted_test[i]] == bodys2[i].is_abnormal:
+            if bodys2[i].is_abnormal:
+                res.set_tp(res.tp + 1)
+            else:
+                res.set_tn(res.tn + 1)
+        else:
+            if bodys2[i].is_abnormal:
+                res.set_fn(res.fn + 1)
+            else:
+                res.set_fp(res.fp + 1)
+    return res
+
 if __name__ == '__main__':
-        pca_fit, gmm_fit = fit_model()
-        """
-        a = read_body_json('examples/data/activity_modeling/c1-result.json')
-        a = pca_predict(a, pca_fit)
-        b = read_body_json('examples/data/activity_modeling/c3-result.json')
-        b = pca_predict(b, pca_fit)
-        c = read_body_json('examples/data/activity_modeling/c5-result.json')
-        c = pca_predict(c, pca_fit)
-        d = read_body_json('examples/data/activity_modeling/c6-result.json')
-        d = pca_predict(d, pca_fit)
-        e = read_body_json('examples/data/activity_modeling/s4-result.json')
-        e = pca_predict(e, pca_fit)
-        """
-        list_bodys_positive = read_body_json('examples/data/activity_modeling/images/train_processed/positive-result.json')
-        list_bodys_negative = read_body_json('examples/data/activity_modeling/images/train_processed/negative-result.json')
 
-        list_bodys_positive = pca_predict(list_bodys_positive, pca_fit)
-        list_bodys_negative = pca_predict(list_bodys_negative, pca_fit)
+    bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
+    bodys2 = read_body_json('examples/data/activity_modeling/images/test_processed/full-result.json')
+    for pca_dimensions in range(3, 15):
+        for gmm_clusters in range(3, 15):
+            pca_fit, gmm_fit = fit_model(pca_dimensions, gmm_clusters)
 
-        list_bodys_positive2 = read_body_json('examples/data/activity_modeling/images/test_processed/positive-result.json')
-        list_bodys_negative2 = read_body_json('examples/data/activity_modeling/images/test_processed/negative-result.json')
+            keypoints_pca = pca_predict(bodys, pca_fit)
+            keypoints_pca2 = pca_predict(bodys2, pca_fit)
 
-        list_bodys_positive2 = pca_predict(list_bodys_positive2, pca_fit)
-        list_bodys_negative2 = pca_predict(list_bodys_negative2, pca_fit)
+            fitted_train = gmm_fit.predict(keypoints_pca)
+            fitted_test = gmm_fit.predict(keypoints_pca2)
 
-        plot_distribuition(list_bodys_positive, list_bodys_negative, list_bodys_positive2, list_bodys_negative2)
+            behaivour_dict = set_gaussian_beaheivours(fitted_train, bodys)
 
-        visualize_2D_gmm(list_bodys_positive, gmm_fit.weights_, gmm_fit.means_.T, np.sqrt(gmm_fit.covariances_).T)
+            res = evaluate_test(fitted_test, bodys2, behaivour_dict)
+
+            print("PCA: " + str(pca_dimensions) + " GMM: " + str(gmm_clusters) + " F1: " + str(res.get_f1_score()))

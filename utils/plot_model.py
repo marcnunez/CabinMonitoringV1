@@ -13,17 +13,17 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import cv2
 
-def plot_distribuition(data1, data2=0, data3=0, data4=0):
+
+def plot_distribuition(data1, data2, data3=0, data4=0):
     fig = plt.figure()
 
     ax = fig.add_subplot(111, projection='3d')
-
     ax.scatter(data1[:, 0], data1[:, 1], data1[:, 2], marker='.')
-    ax.scatter(data2[:, 0], data2[:, 1], data2[:, 2], marker='x')
-
+    for i in range(len(data1)):
+        ax.text(data1[i, 0], data1[i, 1], data1[i, 2], '%s' % (data2[i].image_id), size=10, zorder=1, color='k')
     ax.scatter(data3[:, 0], data3[:, 1], data3[:, 2], marker='o')
-    ax.scatter(data4[:, 0], data4[:, 1], data4[:, 2], marker='X')
-
+    for i in range(len(data3)):
+        ax.text(data3[i, 0], data3[i, 1], data3[i, 2], '%s' % (data4[i].image_id), size=10, zorder=1, color='m')
 
     plt.show()
 
