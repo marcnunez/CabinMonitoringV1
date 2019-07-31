@@ -22,8 +22,7 @@ parser.add_argument('--sp', default=False, action='store_true',
                     help='Use single process for pytorch')
 parser.add_argument('--profile', default=False, action='store_true',
                     help='add speed profiling at screen output')
-parser.add_argument('--pdf', default=False, type=bool,
-                    help='Evaluate probabilistic density function')
+
 
 "----------------------------- Model options -----------------------------"
 parser.add_argument('--netType', default='hgPRM', type=str,
@@ -165,11 +164,13 @@ parser.add_argument('--iouThreshold', default=0.5, type=float,
 
 
 "----------------------------- PDF options -----------------------------"
+parser.add_argument('--pdf', default=False, type=bool,
+                    help='Evaluate probabilistic density function')
 parser.add_argument('--pca', type=int, default=3,
                     help='Dimensions of embeded space')
 parser.add_argument('--clusters', type=int, default=7,
                     help='Number of probabilistic density functions')
-parser.add_argument('--resultName', type=str, default='positive',
+parser.add_argument('--json_name', type=str, default='positive',
                     help='Name of the Json output result')
 
 opt = parser.parse_args()

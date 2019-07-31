@@ -279,7 +279,7 @@ def PCK_match(pick_pred, all_preds, ref_dist):
     return num_match_keypoints
 
 
-def write_json(all_results, outputpath, json_name=opt.resultName, for_eval=False):
+def write_json(all_results, outputpath, json_name=opt.json_name, for_eval=False):
     '''
     all_result: result dict of predictions
     outputpath: output directory
