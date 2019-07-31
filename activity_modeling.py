@@ -85,22 +85,17 @@ def demo_webcam_wraper(results):
         keypoints = sk['keypoints'].numpy()
         body_list.append(BodyModel(id_img, keypoints))
 
-        pca_bodys = pca_predict(body_list, pca_fit)
-        wrong_beheivours = predict_model(pca_bodys, gmm_fit)
-        if wrong_beheivours !=0:
-            print("There is something Wrong, maybe :P")
+    pca_bodys = pca_predict(body_list, pca_fit)
+    wrong_beheivours = predict_model(pca_bodys, gmm_fit)
+
 
 
 def predict_model(bodys_to_predict_gmm, model_fitted):
     list_fitted_bodys = model_fitted.predict(bodys_to_predict_gmm)
-    count = 0
-    for index in list_fitted_bodys:
-        if index == 4:
-            count +=1
-    return
 
 
-#@memory.cache()
+
+@memory.cache()
 def fit_model(pca_components=opt.pca, model_components=opt.clusters):
     list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
                  read_body_json('examples/data/activity_modeling/c3-result.json') + \
