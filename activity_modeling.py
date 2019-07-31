@@ -85,13 +85,13 @@ def demo_webcam_wraper(results):
     for sk in results['result']:
         keypoints = sk['keypoints'].numpy()
         body_list.append(BodyModel(id_img, keypoints))
+    if body_list:
+        pca_bodys = pca_predict(body_list, pca_fit)
+        fitted_demo = gmm_fit.predict(pca_bodys)
 
-    pca_bodys = pca_predict(body_list, pca_fit)
-    fitted_demo = gmm_fit.predict(pca_bodys)
-
-    for i in fitted_demo:
-        if dictionary_gaussian[i]:
-            print("something Wrong")
+        for i in fitted_demo:
+            if dictionary_gaussian[i]:
+                print("something Wrong")
 
 
 @memory.cache()

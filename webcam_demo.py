@@ -58,7 +58,7 @@ if __name__ == "__main__":
 
     print('Starting webcam demo, press Ctrl + C to terminate...')
     sys.stdout.flush()
-    im_names_desc =  tqdm(loop())
+    im_names_desc = tqdm(loop())
     batchSize = args.posebatch
     aux_counter_pdf = 1024
     for i in im_names_desc:
