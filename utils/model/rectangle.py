@@ -44,6 +44,10 @@ class Rectangle:
     def parse_int(coordinate=(0, 0)) -> (int, int):
         return int(coordinate[0]), int(coordinate[1])
 
+    @staticmethod
+    def parse_int_scaled(coordinate=(0, 0)) -> (int, int):
+        return int(coordinate[0]/2), int(coordinate[1]/2)
+
     def get_area(self):
         return self.width * self.height
 

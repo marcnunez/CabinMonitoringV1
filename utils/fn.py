@@ -119,8 +119,6 @@ def vis_frame_fast(frame, im_res, bbox, format='coco'):
 
     im_name = im_res['imgname'].split('/')[-1]
     img = frame
-    for bb in bbox:
-        cv2.rectangle(img, bb.parse_int(bb.top_left), bb.parse_int(bb.get_bottom_right()), (0, 255, 0))
 
     for human in im_res['result']:
         part_line = {}
@@ -134,13 +132,16 @@ def vis_frame_fast(frame, im_res, bbox, format='coco'):
                 continue
             cor_x, cor_y = int(kp_preds[n, 0]), int(kp_preds[n, 1])
             part_line[n] = (cor_x, cor_y)
-            cv2.circle(img, (cor_x, cor_y), 4, p_color[n], -1)
+            img = cv2.circle(img, (cor_x, cor_y), 4, p_color[n], -1)
         # Draw limbs
         for i, (start_p, end_p) in enumerate(l_pair):
             if start_p in part_line and end_p in part_line:
                 start_xy = part_line[start_p]
                 end_xy = part_line[end_p]
-                cv2.line(img, start_xy, end_xy, line_color[i], 2*(kp_scores[start_p] + kp_scores[end_p]) + 1)
+                img = cv2.line(img, start_xy, end_xy, line_color[i], 2*(kp_scores[start_p] + kp_scores[end_p]) + 1)
+        for bb in bbox:
+           img = cv2.rectangle(img, bb.parse_int(bb.top_left), bb.parse_int(bb.get_bottom_right()), (0, 255, 0))
+
     return img
 
 
@@ -180,11 +181,11 @@ def vis_frame(frame, im_res, bbox, format='coco'):
 
     im_name = im_res['imgname'].split('/')[-1]
     img = frame
-    for bb in bbox:
-        cv2.rectangle(img, bb.parse_int(bb.top_left), bb.parse_int(bb.get_bottom_right()), (0, 255, 0))
 
     height,width = img.shape[:2]
     img = cv2.resize(img,(int(width/2), int(height/2)))
+
+
     for human in im_res['result']:
         part_line = {}
         kp_preds = human['keypoints']
@@ -221,7 +222,12 @@ def vis_frame(frame, im_res, bbox, format='coco'):
                 #cv2.line(bg, start_xy, end_xy, line_color[i], (2 * (kp_scores[start_p] + kp_scores[end_p])) + 1)
                 transparency = max(0, min(1, 0.5*(kp_scores[start_p] + kp_scores[end_p])))
                 img = cv2.addWeighted(bg, transparency, img, 1-transparency, 0)
-    img = cv2.resize(img,(width,height),interpolation=cv2.INTER_CUBIC)
+    for bb in bbox:
+        bg = img.copy()
+        cv2.rectangle(bg, bb.parse_int_scaled(bb.top_left), bb.parse_int_scaled(bb.get_bottom_right()), (255, 0, 0))
+        img = cv2.addWeighted(bg, 0.9, img, 0.1, 0)
+
+    img = cv2.resize(img, (width, height), interpolation=cv2.INTER_CUBIC)
     return img
 
 
