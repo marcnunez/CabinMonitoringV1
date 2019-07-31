@@ -13,6 +13,7 @@ from sklearn.decomposition import PCA
 from utils.eval import parse_keypoints_to_array
 from utils.memory import memory
 from opt import opt
+from utils.model.rectangle import compute_bb
 from utils.model.results import Result
 from utils.plot_model import plot_distribuition, visualize_2D_gmm
 
@@ -22,12 +23,13 @@ class BodyModel:
     def __init__(self, image_id: str, keypoints):
         self.image_id = image_id
         keypoints = parse_keypoints_to_array(keypoints)
+        self.original_keypoints = keypoints[:, 0:2]
+        self.rectangle = compute_bb(keypoints)
         self.upper_center_mass = self.set_upper_center_mass(keypoints)
         self.lower_center_mass = self.set_lower_center_mass(keypoints)
         self.mid_center_mass = self.set_mid_center_mass()
         self.orientation = self.set_orientation(keypoints)
         self.keypoints = self.set_relative_keypoints(keypoints)
-        self.original_keypoints = keypoints[:, 0:2]
         self.is_abnormal = self.mark_abnormal_beheaivour(image_id)
 
     @staticmethod
@@ -88,7 +90,6 @@ def demo_webcam_wraper(results):
     if body_list:
         pca_bodys = pca_predict(body_list, pca_fit)
         fitted_demo = gmm_fit.predict(pca_bodys)
-
         for i in fitted_demo:
             if dictionary_gaussian[i]:
                 print("something Wrong")
