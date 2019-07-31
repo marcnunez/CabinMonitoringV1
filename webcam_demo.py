@@ -91,6 +91,7 @@ if __name__ == "__main__":
                 hm = hm.cpu().data
                 writer.save(boxes, scores, hm, pt1, pt2, orig_img, im_name.split('/')[-1])
 
+                # Evaluate Behievour
                 length_results= len(writer.final_result)
                 if opt.pdf & length_results !=0 & length_results != aux_counter_pdf:
                     aux_counter_pdf = length_results

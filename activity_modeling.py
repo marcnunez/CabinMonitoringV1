@@ -80,19 +80,18 @@ def demo_webcam_wraper(results):
     body_list = []
     id_img = results['imgname']
     pca_fit, gmm_fit = fit_model()
+    dictionary_gaussian = set_gaussian_beaheivours(pca_fit, gmm_fit)
 
     for sk in results['result']:
         keypoints = sk['keypoints'].numpy()
         body_list.append(BodyModel(id_img, keypoints))
 
     pca_bodys = pca_predict(body_list, pca_fit)
-    wrong_beheivours = predict_model(pca_bodys, gmm_fit)
+    fitted_demo = gmm_fit.predict(pca_bodys)
 
-
-
-def predict_model(bodys_to_predict_gmm, model_fitted):
-    list_fitted_bodys = model_fitted.predict(bodys_to_predict_gmm)
-
+    for i in fitted_demo:
+        if dictionary_gaussian[i]:
+            print("something Wrong")
 
 
 @memory.cache()
@@ -152,7 +151,12 @@ def read_body_json(json_path):
     return body_list
 
 
-def set_gaussian_beaheivours(fitted_train, bodys):
+@memory.cache()
+def set_gaussian_beaheivours(pca_fit, gmm_fit):
+    bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
+    keypoints_pca = pca_predict(bodys, pca_fit)
+    fitted_train = gmm_fit.predict(keypoints_pca)
+
     dict_abnormal = {}
     out_dict = {}
     dict_total= {}
