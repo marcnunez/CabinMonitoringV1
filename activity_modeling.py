@@ -81,13 +81,12 @@ class BodyModel:
 def demo_webcam_wraper(results):
     bad_beheivour_out = []
     body_list = []
-    id_img = results['imgname']
     pca_fit, gmm_fit = fit_model()
     dictionary_gaussian = set_gaussian_beaheivours(pca_fit, gmm_fit)
 
-    for sk in results['result']:
+    for sk in results:
         keypoints = sk['keypoints'].numpy()
-        body_list.append(BodyModel(id_img, keypoints))
+        body_list.append(BodyModel("", keypoints))
     if body_list:
         pca_bodys = pca_predict(body_list, pca_fit)
         fitted_demo = gmm_fit.predict(pca_bodys)

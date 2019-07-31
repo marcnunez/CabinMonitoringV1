@@ -671,7 +671,7 @@ class DataWriter:
                     self.final_result.append(result)
                     bad_behaivour_bb = []
                     if opt.pdf:
-                        bad_behaivour_bb = demo_webcam_wraper(result)
+                        bad_behaivour_bb = demo_webcam_wraper(result['result'])
 
                     if opt.save_img or opt.save_video or opt.vis:
                         img = vis_frame(orig_img, result, bad_behaivour_bb)
