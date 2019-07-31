@@ -79,6 +79,7 @@ class BodyModel:
 
 
 def demo_webcam_wraper(results):
+    bad_beheivour_out = []
     body_list = []
     id_img = results['imgname']
     pca_fit, gmm_fit = fit_model()
@@ -90,10 +91,11 @@ def demo_webcam_wraper(results):
     if body_list:
         pca_bodys = pca_predict(body_list, pca_fit)
         fitted_demo = gmm_fit.predict(pca_bodys)
-        for i in fitted_demo:
-            if dictionary_gaussian[i]:
+        for i in range(len(fitted_demo)):
+            if dictionary_gaussian[fitted_demo[i]]:
                 print("something Wrong")
-
+                bad_beheivour_out.append(body_list[i].rectangle)
+    return bad_beheivour_out
 
 @memory.cache()
 def fit_model(pca_components=opt.pca, model_components=opt.clusters):

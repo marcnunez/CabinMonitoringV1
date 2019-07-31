@@ -85,7 +85,7 @@ def collate_fn_list(batch):
     return img, inp, im_name
 
 
-def vis_frame_fast(frame, im_res, format='coco'):
+def vis_frame_fast(frame, im_res, bbox, format='coco'):
     '''
     frame: frame image
     im_res: im_res of predictions
@@ -119,6 +119,9 @@ def vis_frame_fast(frame, im_res, format='coco'):
 
     im_name = im_res['imgname'].split('/')[-1]
     img = frame
+    for bb in bbox:
+        cv2.rectangle(img, bb.parse_int(bb.top_left), bb.parse_int(bb.get_bottom_right()), (0, 255, 0))
+
     for human in im_res['result']:
         part_line = {}
         kp_preds = human['keypoints']
@@ -141,7 +144,7 @@ def vis_frame_fast(frame, im_res, format='coco'):
     return img
 
 
-def vis_frame(frame, im_res, format='coco'):
+def vis_frame(frame, im_res, bbox, format='coco'):
     '''
     frame: frame image
     im_res: im_res of predictions
@@ -177,6 +180,9 @@ def vis_frame(frame, im_res, format='coco'):
 
     im_name = im_res['imgname'].split('/')[-1]
     img = frame
+    for bb in bbox:
+        cv2.rectangle(img, bb.parse_int(bb.top_left), bb.parse_int(bb.get_bottom_right()), (0, 255, 0))
+
     height,width = img.shape[:2]
     img = cv2.resize(img,(int(width/2), int(height/2)))
     for human in im_res['result']:

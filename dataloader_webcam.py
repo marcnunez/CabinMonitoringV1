@@ -3,6 +3,7 @@ import torch
 from torch.autograd import Variable
 import torch.utils.data as data
 from SPPE.src.utils.img import cropBox, im_to_torch
+from activity_modeling import demo_webcam_wraper
 from opt import opt
 from yolo.preprocess import prep_frame
 from utils.pPose_nms import pose_nms
@@ -410,8 +411,14 @@ class DataWriter:
                         'result': result
                     }
                     self.final_result.append(result)
+
+                    bad_behaivour_bb = []
+                    if opt.pdf:
+                        bad_behaivour_bb = demo_webcam_wraper(result)
+
+
                     if opt.save_img or opt.save_video or opt.vis:
-                        img = vis_frame(orig_img, result)
+                        img = vis_frame(orig_img, result, bad_behaivour_bb)
                         if opt.vis:
                             cv2.imshow("CabinMonitoringV1 Demo", img)
                             cv2.waitKey(30)
