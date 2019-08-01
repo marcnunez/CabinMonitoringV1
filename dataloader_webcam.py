@@ -1,4 +1,6 @@
 import os
+from copy import deepcopy
+
 import torch
 from torch.autograd import Variable
 import torch.utils.data as data
@@ -411,10 +413,11 @@ class DataWriter:
                         'result': result
                     }
                     self.final_result.append(result)
+                    res_aux = deepcopy(result['result'])
 
                     bad_behaivour_bb = []
                     if opt.pdf:
-                        bad_behaivour_bb = demo_webcam_wraper(result['result'])
+                        bad_behaivour_bb = demo_webcam_wraper(res_aux)
 
 
                     if opt.save_img or opt.save_video or opt.vis:

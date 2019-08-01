@@ -20,6 +20,8 @@ import time
 import torch.multiprocessing as mp
 from multiprocessing import Queue as pQueue
 from threading import Thread
+from copy import deepcopy
+
 # import the Queue class from Python 3
 if sys.version_info >= (3, 0):
     from queue import Queue, LifoQueue
@@ -669,9 +671,10 @@ class DataWriter:
                         'result': result
                     }
                     self.final_result.append(result)
+                    res_aux = deepcopy(result['result'])
                     bad_behaivour_bb = []
                     if opt.pdf:
-                        bad_behaivour_bb = demo_webcam_wraper(result['result'])
+                        bad_behaivour_bb = demo_webcam_wraper(res_aux)
 
                     if opt.save_img or opt.save_video or opt.vis:
                         img = vis_frame(orig_img, result, bad_behaivour_bb)
