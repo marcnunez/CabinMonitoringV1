@@ -7,7 +7,7 @@ import numpy as np
 import os
 import json
 
-from sklearn import mixture
+from sklearn import mixture, cluster, neighbors
 from sklearn.decomposition import PCA
 
 from utils.eval import parse_keypoints_to_array
@@ -89,7 +89,10 @@ def demo_webcam_wraper(results):
         body_list.append(BodyModel("", keypoints))
     if body_list:
         pca_bodys = pca_predict(body_list, pca_fit)
-        fitted_demo = gmm_fit.predict(pca_bodys)
+        if opt.model_name == "neighbours":
+            fitted_demo = gmm_fit.kneighbors(pca_bodys)
+        else:
+            fitted_demo = gmm_fit.predict(pca_bodys)
         for i in range(len(fitted_demo)):
             if dictionary_gaussian[fitted_demo[i]]:
                 print("something Wrong")
@@ -123,8 +126,14 @@ def fit_model(pca_components=opt.pca, model_components=opt.clusters):
         list_pca_predict.append(body.keypoints.flatten())
     list_pca_predict = np.vstack(list_pca_predict)
     list_fitted = sklearn_pca_fitted.transform(list_pca_predict)
+    g = []
+    if opt.model_name == "gmm":
+        g = mixture.GaussianMixture(n_components=model_components, max_iter=100, covariance_type='diag')
+    elif opt.model_name == "k-means":
+        g = cluster.KMeans(n_clusters=model_components)
+    elif opt.model_name == "neighbours":
+        g = neighbors.NearestNeighbors(n_neighbors=model_components)
 
-    g = mixture.GaussianMixture(n_components=model_components, max_iter=100, covariance_type='diag')
     return sklearn_pca_fitted, g.fit(list_fitted)
 
 

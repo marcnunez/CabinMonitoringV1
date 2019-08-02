@@ -183,6 +183,8 @@ class VideoLoader:
         self.path = path
         self.stream = cv2.VideoCapture(path)
         assert self.stream.isOpened(), 'Cannot capture source'
+        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 128)
+        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 128)
         self.stopped = False
         
 

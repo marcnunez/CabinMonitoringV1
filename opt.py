@@ -172,6 +172,9 @@ parser.add_argument('--clusters', type=int, default=7,
                     help='Number of probabilistic density functions')
 parser.add_argument('--json_name', type=str, default='positive',
                     help='Name of the Json output result')
+parser.add_argument('--model_name', type=str, default='gmm',
+                    help='Name of the PDF model. Options: gmm, k-means')
+
 
 opt = parser.parse_args()
 
