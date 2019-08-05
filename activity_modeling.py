@@ -6,6 +6,7 @@
 import numpy as np
 import os
 import json
+import pandas as pd
 
 from sklearn import mixture, cluster, neighbors
 from sklearn.decomposition import PCA
@@ -202,16 +203,15 @@ def evaluate_test(fitted_test, bodys2, behaivour_dict) -> Result:
     return res
 
 
-if __name__ == '__main__':
-
+def get_best_combination():
     bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
     bodys2 = read_body_json('examples/data/activity_modeling/images/test_processed/full-result.json')
-    full_results_mean = np.zeros((15, 15))
-    full_results_var = np.zeros((15, 15))
+    full_results_mean = np.zeros((28, 28))
+    full_results_var = np.zeros((28, 28))
     gmm_index = 0
-    for gmm_clusters in range(2, 17):
+    for gmm_clusters in range(2, 30):
         pca_index = 0
-        for pca_dimensions in range(2, 17):
+        for pca_dimensions in range(2, 30):
             list_results = np.zeros((20, 1))
             for iteration in range(0, 20):
                 pca_fit, gmm_fit = fit_model(pca_dimensions, gmm_clusters)
@@ -235,4 +235,14 @@ if __name__ == '__main__':
         gmm_index +=1
 
     plot_color_gradients(full_results_mean, 'mean_F1_GMM')
+    save_excel(full_results_mean, 'mean_F1_GMM')
     plot_color_gradients(full_results_var, 'var_F1_GMM')
+    save_excel(full_results_var, 'var_F1_GMM')
+
+
+def save_excel(data, filepath):
+    df = pd.DataFrame(data)
+    df.to_excel(filepath+".xlsx", index=False)
+
+if __name__ == '__main__':
+    get_best_combination()

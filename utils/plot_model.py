@@ -144,8 +144,10 @@ def plot_boxes(path_image, bb_detect, bb_gt):
 
 
 def plot_color_gradients(matrix, name: str):
-    some_matrix = np.random.rand(10, 10)
-    cmap = clr.LinearSegmentedColormap.from_list('custom blue', ['#244162', '#DCE6F1'], N=256)
-    plt.matshow(matrix)
+
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    cax = ax.matshow(matrix, interpolation='nearest')
+    fig.colorbar(cax)
     plt.show()
     plt.savefig(name+'.png')
