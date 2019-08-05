@@ -15,7 +15,7 @@ from utils.memory import memory
 from opt import opt
 from utils.model.rectangle import compute_bb
 from utils.model.results import Result
-from utils.plot_model import plot_distribuition, visualize_2D_gmm
+from utils.plot_model import plot_distribuition, visualize_2D_gmm, plot_color_gradients
 
 
 class BodyModel:
@@ -99,7 +99,7 @@ def demo_webcam_wraper(results):
                 bad_beheivour_out.append(body_list[i].rectangle)
     return bad_beheivour_out
 
-@memory.cache()
+#@memory.cache()
 def fit_model(pca_components=opt.pca, model_components=opt.clusters):
     list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
                  read_body_json('examples/data/activity_modeling/c3-result.json') + \
@@ -162,7 +162,7 @@ def read_body_json(json_path):
     return body_list
 
 
-@memory.cache()
+#@memory.cache()
 def set_gaussian_beaheivours(pca_fit, gmm_fit):
     bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
     keypoints_pca = pca_predict(bodys, pca_fit)
@@ -201,12 +201,17 @@ def evaluate_test(fitted_test, bodys2, behaivour_dict) -> Result:
                 res.set_fp(res.fp + 1)
     return res
 
+
 if __name__ == '__main__':
 
     bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
     bodys2 = read_body_json('examples/data/activity_modeling/images/test_processed/full-result.json')
-    for pca_dimensions in range(3, 15):
-        for gmm_clusters in range(3, 15):
+    full_results_mean = np.zeros((15, 15))
+    full_results_var = np.zeros((15, 15))
+    gmm_index = 0
+    for gmm_clusters in range(2, 17):
+        pca_index = 0
+        for pca_dimensions in range(2, 17):
             list_results = np.zeros((20, 1))
             for iteration in range(0, 20):
                 pca_fit, gmm_fit = fit_model(pca_dimensions, gmm_clusters)
@@ -217,9 +222,17 @@ if __name__ == '__main__':
                 fitted_train = gmm_fit.predict(keypoints_pca)
                 fitted_test = gmm_fit.predict(keypoints_pca2)
 
-                behaivour_dict = set_gaussian_beaheivours(fitted_train, bodys)
+                behaivour_dict = set_gaussian_beaheivours(pca_fit, gmm_fit)
 
                 res = evaluate_test(fitted_test, bodys2, behaivour_dict)
                 list_results[iteration] = res.get_f1_score()
+            full_results_mean[pca_index, gmm_index] = round(list_results.mean(), 4)
+            full_results_var[pca_index, gmm_index] = round(list_results.var(), 4)
+
             print("PCA: " + str(pca_dimensions) + " GMM: " + str(gmm_clusters) + " F1 AVG: " +
                   str(round(list_results.mean(), 4)) + " F1 VAR: " + str(round(list_results.var(), 4)))
+            pca_index +=1
+        gmm_index +=1
+
+    plot_color_gradients(full_results_mean, 'mean_F1_GMM')
+    plot_color_gradients(full_results_var, 'var_F1_GMM')

@@ -12,6 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import cv2
+import matplotlib.colors as clr
 
 
 def plot_distribuition(data1, data2, data3=0, data4=0):
@@ -142,3 +143,9 @@ def plot_boxes(path_image, bb_detect, bb_gt):
     cv2.waitKey(1)
 
 
+def plot_color_gradients(matrix, name: str):
+    some_matrix = np.random.rand(10, 10)
+    cmap = clr.LinearSegmentedColormap.from_list('custom blue', ['#244162', '#DCE6F1'], N=256)
+    plt.matshow(matrix)
+    plt.show()
+    plt.savefig(name+'.png')
