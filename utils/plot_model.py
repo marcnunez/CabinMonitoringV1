@@ -145,9 +145,15 @@ def plot_boxes(path_image, bb_detect, bb_gt):
 
 def plot_color_gradients(matrix, name: str):
 
-    fig = plt.figure()
+    fig = plt.figure(figsize=(15, 15))
     ax = fig.add_subplot(111)
     cax = ax.matshow(matrix, interpolation='nearest')
+    for (i, j), z in np.ndenumerate(matrix*10):
+        ax.text(j, i, '{:0.1f}'.format(z), ha='center', va='center')
+
+    plt.xlabel("Model Clusters")
+    plt.ylabel("Number Dimensions")
+    plt.title(name)
     fig.colorbar(cax)
-    plt.show()
     plt.savefig(name+'.png')
+    plt.show()

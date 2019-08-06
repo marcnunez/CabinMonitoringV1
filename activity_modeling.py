@@ -100,8 +100,9 @@ def demo_webcam_wraper(results):
                 bad_beheivour_out.append(body_list[i].rectangle)
     return bad_beheivour_out
 
+
 #@memory.cache()
-def fit_model(pca_components=opt.pca, model_components=opt.clusters):
+def fit_model(pca_components=opt.pca, model_components=opt.clusters, model_name=opt.model_name):
     list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
                  read_body_json('examples/data/activity_modeling/c3-result.json') + \
                  read_body_json('examples/data/activity_modeling/c5-result.json') + \
@@ -128,11 +129,11 @@ def fit_model(pca_components=opt.pca, model_components=opt.clusters):
     list_pca_predict = np.vstack(list_pca_predict)
     list_fitted = sklearn_pca_fitted.transform(list_pca_predict)
     g = []
-    if opt.model_name == "gmm":
+    if model_name == "gmm":
         g = mixture.GaussianMixture(n_components=model_components, max_iter=100, covariance_type='diag')
-    elif opt.model_name == "k-means":
+    elif model_name == "kmeans":
         g = cluster.KMeans(n_clusters=model_components)
-    elif opt.model_name == "neighbours":
+    elif model_name == "neighbours":
         g = neighbors.NearestNeighbors(n_neighbors=model_components)
 
     return sklearn_pca_fitted, g.fit(list_fitted)
@@ -171,8 +172,14 @@ def set_gaussian_beaheivours(pca_fit, gmm_fit):
 
     dict_abnormal = {}
     out_dict = {}
-    dict_total= {}
-    for i in range(0, gmm_fit.n_components):
+    dict_total = {}
+    n_components = 0
+    if gmm_fit._estimator_type == 'DensityEstimator':
+        n_components = gmm_fit.n_components
+    elif gmm_fit._estimator_type == 'clusterer':
+        n_components = gmm_fit.n_clusters
+
+    for i in range(0, n_components):
         dict_abnormal[i] = 0
         dict_total[i] = 0
         out_dict[i] = False
@@ -203,7 +210,7 @@ def evaluate_test(fitted_test, bodys2, behaivour_dict) -> Result:
     return res
 
 
-def get_best_combination():
+def get_best_combination(name_model):
     bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
     bodys2 = read_body_json('examples/data/activity_modeling/images/test_processed/full-result.json')
     full_results_mean = np.zeros((28, 28))
@@ -214,7 +221,7 @@ def get_best_combination():
         for pca_dimensions in range(2, 30):
             list_results = np.zeros((20, 1))
             for iteration in range(0, 20):
-                pca_fit, gmm_fit = fit_model(pca_dimensions, gmm_clusters)
+                pca_fit, gmm_fit = fit_model(pca_dimensions, gmm_clusters, name_model)
 
                 keypoints_pca = pca_predict(bodys, pca_fit)
                 keypoints_pca2 = pca_predict(bodys2, pca_fit)
@@ -229,20 +236,22 @@ def get_best_combination():
             full_results_mean[pca_index, gmm_index] = round(list_results.mean(), 4)
             full_results_var[pca_index, gmm_index] = round(list_results.var(), 4)
 
-            print("PCA: " + str(pca_dimensions) + " GMM: " + str(gmm_clusters) + " F1 AVG: " +
+            print("PCA: " + str(pca_dimensions) + " CLUSTERS: " + str(gmm_clusters) + " F1 AVG: " +
                   str(round(list_results.mean(), 4)) + " F1 VAR: " + str(round(list_results.var(), 4)))
             pca_index +=1
         gmm_index +=1
 
-    plot_color_gradients(full_results_mean, 'mean_F1_GMM')
-    save_excel(full_results_mean, 'mean_F1_GMM')
-    plot_color_gradients(full_results_var, 'var_F1_GMM')
-    save_excel(full_results_var, 'var_F1_GMM')
+    plot_color_gradients(full_results_mean, 'mean_F1_' + name_model)
+    save_excel(full_results_mean, 'mean_F1_' + name_model)
+    plot_color_gradients(full_results_var, 'var_F1_' + name_model)
+    save_excel(full_results_var, 'var_F1_' + name_model)
 
 
 def save_excel(data, filepath):
     df = pd.DataFrame(data)
     df.to_excel(filepath+".xlsx", index=False)
 
+
 if __name__ == '__main__':
-    get_best_combination()
+    get_best_combination('kmeans')
+
