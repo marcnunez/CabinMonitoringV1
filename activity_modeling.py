@@ -16,7 +16,7 @@ from utils.memory import memory
 from opt import opt
 from utils.model.rectangle import compute_bb
 from utils.model.results import Result
-from utils.plot_model import plot_distribuition, visualize_2D_gmm, plot_color_gradients
+from utils.plot_model import plot_distribuition, visualize_2D_gmm, plot_color_gradients, plot_color_3dmap
 
 
 class BodyModel:
@@ -134,7 +134,11 @@ def fit_model(pca_components=opt.pca, model_components=opt.clusters, model_name=
     elif model_name == "kmeans":
         g = cluster.KMeans(n_clusters=model_components)
     elif model_name == "neighbours":
-        g = neighbors.NearestNeighbors(n_neighbors=model_components)
+        g = neighbors.KNeighborsClassifier(n_neighbors=model_components)
+    elif model_name == "meanshift":
+        g = cluster.MeanShift(bandwidth=model_components)
+    elif model_name == "spectral":
+        g = cluster.SpectralClustering(n_clusters=model_components)
 
     return sklearn_pca_fitted, g.fit(list_fitted)
 
@@ -165,7 +169,7 @@ def read_body_json(json_path):
 
 
 #@memory.cache()
-def set_gaussian_beaheivours(pca_fit, gmm_fit):
+def set_gaussian_beaheivours(pca_fit, gmm_fit, clusters = opt.clusters):
     bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
     keypoints_pca = pca_predict(bodys, pca_fit)
     fitted_train = gmm_fit.predict(keypoints_pca)
@@ -173,13 +177,8 @@ def set_gaussian_beaheivours(pca_fit, gmm_fit):
     dict_abnormal = {}
     out_dict = {}
     dict_total = {}
-    n_components = 0
-    if gmm_fit._estimator_type == 'DensityEstimator':
-        n_components = gmm_fit.n_components
-    elif gmm_fit._estimator_type == 'clusterer':
-        n_components = gmm_fit.n_clusters
 
-    for i in range(0, n_components):
+    for i in range(0, clusters):
         dict_abnormal[i] = 0
         dict_total[i] = 0
         out_dict[i] = False
@@ -229,7 +228,7 @@ def get_best_combination(name_model):
                 fitted_train = gmm_fit.predict(keypoints_pca)
                 fitted_test = gmm_fit.predict(keypoints_pca2)
 
-                behaivour_dict = set_gaussian_beaheivours(pca_fit, gmm_fit)
+                behaivour_dict = set_gaussian_beaheivours(pca_fit, gmm_fit, gmm_clusters)
 
                 res = evaluate_test(fitted_test, bodys2, behaivour_dict)
                 list_results[iteration] = res.get_f1_score()
@@ -251,7 +250,10 @@ def save_excel(data, filepath):
     df = pd.DataFrame(data)
     df.to_excel(filepath+".xlsx", index=False)
 
+def plot_excel(filepath):
+    data = pd.read_excel(open(filepath, 'rb')).to_numpy()
+    data = data*10
+    plot_color_3dmap(data, "3d_mean_F1_GMM")
 
 if __name__ == '__main__':
-    get_best_combination('kmeans')
-
+    plot_excel("mean_F1_GMM.xlsx")
