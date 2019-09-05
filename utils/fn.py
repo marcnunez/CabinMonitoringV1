@@ -222,8 +222,10 @@ def vis_frame(frame, im_res, bbox, format='coco'):
                 #cv2.line(bg, start_xy, end_xy, line_color[i], (2 * (kp_scores[start_p] + kp_scores[end_p])) + 1)
                 transparency = max(0, min(1, 0.5*(kp_scores[start_p] + kp_scores[end_p])))
                 img = cv2.addWeighted(bg, transparency, img, 1-transparency, 0)
-    for bb in bbox:
-        cv2.rectangle(img, bb.parse_int_scaled(bb.top_left), bb.parse_int_scaled(bb.get_bottom_right()), (255, 0, 0))
+    for bb in bbox["incorrect"]:
+        cv2.rectangle(img, bb.parse_int_scaled(bb.top_left), bb.parse_int_scaled(bb.get_bottom_right()), (0, 0, 255))
+    for bb in bbox["correct"]:
+        cv2.rectangle(img, bb.parse_int_scaled(bb.top_left), bb.parse_int_scaled(bb.get_bottom_right()), (0, 255, 0))
 
     img = cv2.resize(img, (width, height), interpolation=cv2.INTER_CUBIC)
     return img

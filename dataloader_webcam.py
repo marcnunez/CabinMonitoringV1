@@ -36,6 +36,8 @@ class WebcamLoader:
         # used to indicate if the thread should be stopped or not
         self.stream = cv2.VideoCapture(int(webcam))
         assert self.stream.isOpened(), 'Cannot capture source'
+      #  self.stream.set(3, 640)
+       # self.stream.set(4, 480)
         self.stopped = False
         # initialize the queue used to store frames read from
         # the video file
@@ -61,6 +63,7 @@ class WebcamLoader:
                 im_dim_list = []
                 for k in range(self.batchSize):
                     (grabbed, frame) = self.stream.read()
+                    frame = cv2.resize(frame, (640,480), interpolation=cv2.INTER_AREA)
                     # if the `grabbed` boolean is `False`, then we have
                     # reached the end of the video file
                     if not grabbed:
@@ -251,6 +254,8 @@ class WebcamDetectionLoader:
 
         self.stream = cv2.VideoCapture(int(webcam))
         assert self.stream.isOpened(), 'Cannot open webcam'
+        #self.stream.set(3, 640)
+        #self.stream.set(4, 480)
         self.stopped = False
         self.batchSize = batchSize
 
@@ -279,6 +284,8 @@ class WebcamDetectionLoader:
             im_dim_list = []
             for k in range(self.batchSize):
                 (grabbed, frame) = self.stream.read()
+                frame = cv2.resize(frame, (640, 480), interpolation=cv2.INTER_AREA)
+
                 if not grabbed:
                     continue
                 # process and add the frame to the queue

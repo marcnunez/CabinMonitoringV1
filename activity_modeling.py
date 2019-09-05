@@ -8,8 +8,9 @@ import os
 import json
 import pandas as pd
 
-from sklearn import mixture, cluster, neighbors
+from sklearn import mixture, cluster, neighbors, svm
 from sklearn.decomposition import PCA
+
 
 from utils.eval import parse_keypoints_to_array
 from utils.memory import memory
@@ -80,7 +81,9 @@ class BodyModel:
 
 
 def demo_webcam_wraper(results):
+    out = {}
     bad_beheivour_out = []
+    good_behaviour_out = []
     body_list = []
     pca_fit, gmm_fit = fit_model()
     dictionary_gaussian = set_gaussian_beaheivours(pca_fit, gmm_fit)
@@ -98,10 +101,14 @@ def demo_webcam_wraper(results):
             if dictionary_gaussian[fitted_demo[i]]:
                 print("something Wrong")
                 bad_beheivour_out.append(body_list[i].rectangle)
-    return bad_beheivour_out
+            else:
+                good_behaviour_out.append(body_list[i].rectangle)
+    out["correct"] = good_behaviour_out
+    out["incorrect"] = bad_beheivour_out
+    return out
 
 
-#@memory.cache()
+@memory.cache()
 def fit_model(pca_components=opt.pca, model_components=opt.clusters, model_name=opt.model_name):
     list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
                  read_body_json('examples/data/activity_modeling/c3-result.json') + \
@@ -132,13 +139,15 @@ def fit_model(pca_components=opt.pca, model_components=opt.clusters, model_name=
     if model_name == "gmm":
         g = mixture.GaussianMixture(n_components=model_components, max_iter=100, covariance_type='diag')
     elif model_name == "kmeans":
-        g = cluster.KMeans(n_clusters=model_components)
+        g = cluster.KMeans(n_clusters=model_components, n_jobs=-1)
     elif model_name == "neighbours":
         g = neighbors.KNeighborsClassifier(n_neighbors=model_components)
     elif model_name == "meanshift":
         g = cluster.MeanShift(bandwidth=model_components)
     elif model_name == "spectral":
         g = cluster.SpectralClustering(n_clusters=model_components)
+    elif model_name == "svm":
+        g = svm.SCV()
 
     return sklearn_pca_fitted, g.fit(list_fitted)
 
@@ -168,7 +177,7 @@ def read_body_json(json_path):
     return body_list
 
 
-#@memory.cache()
+@memory.cache()
 def set_gaussian_beaheivours(pca_fit, gmm_fit, clusters = opt.clusters):
     bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
     keypoints_pca = pca_predict(bodys, pca_fit)
@@ -212,12 +221,12 @@ def evaluate_test(fitted_test, bodys2, behaivour_dict) -> Result:
 def get_best_combination(name_model):
     bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
     bodys2 = read_body_json('examples/data/activity_modeling/images/test_processed/full-result.json')
-    full_results_mean = np.zeros((28, 28))
-    full_results_var = np.zeros((28, 28))
+    full_results_mean = np.zeros((32, 32))
+    full_results_var = np.zeros((32, 32))
     gmm_index = 0
-    for gmm_clusters in range(2, 30):
+    for gmm_clusters in range(2, 34):
         pca_index = 0
-        for pca_dimensions in range(2, 30):
+        for pca_dimensions in range(2, 34):
             list_results = np.zeros((20, 1))
             for iteration in range(0, 20):
                 pca_fit, gmm_fit = fit_model(pca_dimensions, gmm_clusters, name_model)
@@ -242,7 +251,7 @@ def get_best_combination(name_model):
 
     plot_color_gradients(full_results_mean, 'mean_F1_' + name_model)
     save_excel(full_results_mean, 'mean_F1_' + name_model)
-    plot_color_gradients(full_results_var, 'var_F1_' + name_model)
+    plot_color_gradients(full_results_var, 'var_F1_' + name_model, 'white')
     save_excel(full_results_var, 'var_F1_' + name_model)
 
 
@@ -250,10 +259,24 @@ def save_excel(data, filepath):
     df = pd.DataFrame(data)
     df.to_excel(filepath+".xlsx", index=False)
 
-def plot_excel(filepath):
-    data = pd.read_excel(open(filepath, 'rb')).to_numpy()
-    data = data*10
-    plot_color_3dmap(data, "3d_mean_F1_GMM")
+def plot_excel():
+    """
+    data = pd.read_excel(open("mean_F1_gmm_diag.xlsx", 'rb')).to_numpy()
+    #plot_color_3dmap(data, "3d_mean_F1_gmm")
+    plot_color_gradients(data, "mean_F1_gmm")
+    data = pd.read_excel(open("mean_F1_kmeans.xlsx", 'rb')).to_numpy()
+    #plot_color_3dmap(data, "3d_mean_F1_kmeans")
+    plot_color_gradients(data, "mean_F1_kmeans")
+    data = pd.read_excel(open("var_F1_gmm_diag.xlsx", 'rb')).to_numpy()
+    #plot_color_3dmap(data, "3d_var_F1_gmm")
+    plot_color_gradients(data, "var_F1_gmm", "white")
+    data = pd.read_excel(open("var_F1_kmeans.xlsx", 'rb')).to_numpy()
+    #plot_color_3dmap(data, "3d_var_F1_kmeans")
+    plot_color_gradients(data, "var_F1_kmeans", "white")
+    """
+
+    data = pd.read_excel(open("var_F1_gmm_tied.xlsx", 'rb')).to_numpy()
+    plot_color_gradients(data, "var_F1_gmm_tied", "white")
 
 if __name__ == '__main__':
-    plot_excel("mean_F1_GMM.xlsx")
+    get_best_combination("kmeans")

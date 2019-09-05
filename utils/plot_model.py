@@ -10,9 +10,9 @@ import matplotlib.patches as patches
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import pylab
+from matplotlib import pylab, cm
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D, axes3d
 import cv2
 import matplotlib.colors as clr
 
@@ -145,39 +145,47 @@ def plot_boxes(path_image, bb_detect, bb_gt):
     cv2.waitKey(1)
 
 
-def plot_color_gradients(matrix, name: str):
+def plot_color_gradients(matrix, name: str, color_font: str = 'black'):
 
-    fig = plt.figure(figsize=(13, 13))
+    matrix = matrix*100
+    fig = plt.figure(figsize=(13, 13), frameon=False)
     ax = fig.add_subplot(111)
-    cax = ax.matshow(matrix, interpolation='nearest')
+    cax = ax.matshow(matrix, interpolation='nearest', origin='lower')
     ax.tick_params(axis='both', which='major', labelsize=20)
 
-    for (i, j), z in np.ndenumerate(matrix*10):
-        ax.text(j, i, '{:0.1f}'.format(z), ha='center', va='center', color="black", rotation="30")
+    for (i, j), z in np.ndenumerate(matrix):
+        ax.text(j, i, '{:0.1f}'.format(z), ha='center', va='center', color=color_font, rotation="30")
 
-    plt.xlabel("Model Clusters", fontsize=20)
-    plt.ylabel("Number Dimensions", fontsize=20)
-    plt.title(name, fontsize=25)
+    plt.xlabel("Number of Components", fontsize=20)
+    plt.ylabel("Number of Dimensions", fontsize=20)
+    plt.xticks(np.arange(2, 34, 2))
+    plt.yticks(np.arange(2, 34, 2))
+    #plt.title(name, fontsize=25)
 
     divider = make_axes_locatable(ax)
     cax_size = divider.append_axes("right", size="5%", pad=0.05)
     cbar = fig.colorbar(cax, cax= cax_size)
-    cbar.ax.tick_params(labelsize=15)
+    cbar.ax.tick_params(labelsize=20)
 
-    plt.savefig(name+'.png', pad_inches=0)
-    plt.show()
+    plt.savefig(name+'.png', pad_inches=0, bbox_inches='tight')
+    #plt.show()
 
 
 def plot_color_3dmap(matrix, name: str):
 
-    ax = plt.axes(projection='3d')
-    ax.tick_params(axis='both', which='major', labelsize=20)
-    ax.plot_surface(matrix[:,:,0], matrix[:,:,1], matrix[:,:,2], rstride=1, cstride=1,
-                    cmap='viridis', edgecolor='none');
+    X = np.arange(2, 34, 1)
+    Y = np.arange(2, 34, 1)
+    X, Y = np.meshgrid(X, Y)
+    fig = plt.figure(figsize=(13, 13), frameon=False)
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X, Y, matrix,
+                       linewidth=1, antialiased=True, cmap='viridis')
+    ax.view_init(elev=35., azim=225)
 
     plt.xlabel("Model Clusters", fontsize=20)
     plt.ylabel("Number Dimensions", fontsize=20)
-    plt.title(name, fontsize=25)
+    #plt.title(name, fontsize=25)
 
-    plt.savefig(name+'.png', pad_inches=0)
-    plt.show()
+    plt.savefig(name+'.png', pad_inches=0, bbox_inches='tight')
+    #plt.show()
+
