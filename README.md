@@ -36,7 +36,7 @@ python3 video_demo.py --video ${path to video} --outdir examples/res --save_vide
 ```
 - **Webcam**:  Run AlphaPose using webcam and visualize the results with:
 ```
-python3 webcam_demo.py --webcam 0 --outdir examples/res --vis
+python3 webcam_demo.py --webcam 0 --posebatch 40 --nThreads 5 --sp --vis --nms 0.25 --pdf True --nClasses 33 --pathModel ./models/sppe/coco_cabin.pth
 ```
 - **Input list**:  Run AlphaPose for images in a list and save the rendered images with:
 ```
