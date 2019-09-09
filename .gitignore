@@ -35,8 +35,6 @@ venv/
 *.jpg
 *.pth
 *.wegiths
-*.json
-
 *.tensorflow
 *coco
 *.tensorboard
@@ -47,3 +45,4 @@ train_sppe/data/*
 *.xlsx
 *.png
 
+examples/

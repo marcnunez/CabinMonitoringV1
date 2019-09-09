@@ -110,18 +110,18 @@ def demo_webcam_wraper(results):
 
 @memory.cache()
 def fit_model(pca_components=opt.pca, model_components=opt.clusters, model_name=opt.model_name):
-    list_bodys = read_body_json('examples/data/activity_modeling/c1-result.json') + \
-                 read_body_json('examples/data/activity_modeling/c3-result.json') + \
-                 read_body_json('examples/data/activity_modeling/c5-result.json') + \
-                 read_body_json('examples/data/activity_modeling/c6-result.json') + \
-                 read_body_json('examples/data/activity_modeling/c7-result.json') + \
-                 read_body_json('examples/data/activity_modeling/c8-result.json') + \
-                 read_body_json('examples/data/activity_modeling/i1-result.json') + \
-                 read_body_json('examples/data/activity_modeling/i2-result.json') + \
-                 read_body_json('examples/data/activity_modeling/i3-result.json') + \
-                 read_body_json('examples/data/activity_modeling/s2-result.json') + \
-                 read_body_json('examples/data/activity_modeling/s3-result.json') + \
-                 read_body_json('examples/data/activity_modeling/s4-result.json')
+    list_bodys = read_body_json('models/activity_modeling/c1-result.json') + \
+                 read_body_json('models/activity_modeling/c3-result.json') + \
+                 read_body_json('models/activity_modeling/c5-result.json') + \
+                 read_body_json('models/activity_modeling/c6-result.json') + \
+                 read_body_json('models/activity_modeling/c7-result.json') + \
+                 read_body_json('models/activity_modeling/c8-result.json') + \
+                 read_body_json('models/activity_modeling/i1-result.json') + \
+                 read_body_json('models/activity_modeling/i2-result.json') + \
+                 read_body_json('models/activity_modeling/i3-result.json') + \
+                 read_body_json('models/activity_modeling/s2-result.json') + \
+                 read_body_json('models/activity_modeling/s3-result.json') + \
+                 read_body_json('models/activity_modeling/s4-result.json')
 
     pca_fit_list = []
     for human in list_bodys:
@@ -179,7 +179,7 @@ def read_body_json(json_path):
 
 @memory.cache()
 def set_gaussian_beaheivours(pca_fit, gmm_fit, clusters = opt.clusters):
-    bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
+    bodys = read_body_json('models/activity_modeling/train_processed/full-result.json')
     keypoints_pca = pca_predict(bodys, pca_fit)
     fitted_train = gmm_fit.predict(keypoints_pca)
 
@@ -219,8 +219,8 @@ def evaluate_test(fitted_test, bodys2, behaivour_dict) -> Result:
 
 
 def get_best_combination(name_model):
-    bodys = read_body_json('examples/data/activity_modeling/images/train_processed/full-result.json')
-    bodys2 = read_body_json('examples/data/activity_modeling/images/test_processed/full-result.json')
+    bodys = read_body_json('models/activity_modeling/train_processed/full-result.json')
+    bodys2 = read_body_json('models/activity_modeling/test_processed/full-result.json')
     full_results_mean = np.zeros((32, 32))
     full_results_var = np.zeros((32, 32))
     gmm_index = 0
