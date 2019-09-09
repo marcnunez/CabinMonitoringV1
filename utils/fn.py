@@ -226,8 +226,9 @@ def vis_frame(frame, im_res, bbox, format='coco'):
         cv2.rectangle(img, bb.parse_int_scaled(bb.top_left), bb.parse_int_scaled(bb.get_bottom_right()), (0, 0, 255))
     for bb in bbox["correct"]:
         cv2.rectangle(img, bb.parse_int_scaled(bb.top_left), bb.parse_int_scaled(bb.get_bottom_right()), (0, 255, 0))
+    img = cv2.resize(img, (640, 480), interpolation=cv2.INTER_CUBIC)
 
-    img = cv2.resize(img, (width, height), interpolation=cv2.INTER_CUBIC)
+    #img = cv2.resize(img, (1280, 720), interpolation=cv2.INTER_CUBIC)
     return img
 
 

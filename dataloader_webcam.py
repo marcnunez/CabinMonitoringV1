@@ -402,6 +402,8 @@ class DataWriter:
                     if opt.save_img or opt.save_video or opt.vis:
                         img = orig_img
                         if opt.vis:
+                            img = cv2.resize(img, (640, 480), interpolation=cv2.INTER_CUBIC)
+
                             cv2.imshow("CabinMonitoringV1 Demo", img)
                             cv2.waitKey(30)
                         if opt.save_img:
