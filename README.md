@@ -22,7 +22,7 @@ Project forked from:
   pip install -r requirements.txt
   ```
 
-3. Download the models manually:  ([Google Drive](https://drive.google.com/drive/folders/1MDlT3D45sb5QPIhznWahqwTQxJhYeglf?usp=sharing). Place them into `./models
+3. Download the models manually:  ([Google Drive](https://drive.google.com/drive/folders/1MDlT3D45sb5QPIhznWahqwTQxJhYeglf?usp=sharing)). Place them into `./models
 
 
 ## Quick Start
