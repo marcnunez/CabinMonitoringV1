@@ -8,8 +8,7 @@ import cv2
 from util import *
 from darknet import Darknet
 from preprocess import prep_image, inp_to_image
-import pandas as pd
-import random 
+import random
 import argparse
 import pickle as pkl
 

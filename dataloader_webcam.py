@@ -428,9 +428,9 @@ class DataWriter:
                     if opt.pdf:
                         bad_behaivour_bb = demo_webcam_wraper(res_aux)
 
-
                     if opt.save_img or opt.save_video or opt.vis:
                         img = vis_frame(orig_img, result, bad_behaivour_bb)
+                        #img = cv2.resize(img, (640*2, 480*2), interpolation=cv2.INTER_LINEAR)
                         if opt.vis:
                             cv2.imshow("CabinMonitoringV1 Demo", img)
                             cv2.waitKey(30)

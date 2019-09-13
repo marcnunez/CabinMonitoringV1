@@ -6,7 +6,6 @@
 import numpy as np
 import os
 import json
-import pandas as pd
 
 from sklearn import mixture, cluster, neighbors, svm
 from sklearn.decomposition import PCA
@@ -250,17 +249,16 @@ def get_best_combination(name_model):
         gmm_index +=1
 
     plot_color_gradients(full_results_mean, 'mean_F1_' + name_model)
-    save_excel(full_results_mean, 'mean_F1_' + name_model)
+    #save_excel(full_results_mean, 'mean_F1_' + name_model)
     plot_color_gradients(full_results_var, 'var_F1_' + name_model, 'white')
-    save_excel(full_results_var, 'var_F1_' + name_model)
+    #save_excel(full_results_var, 'var_F1_' + name_model)
 
-
+    """
 def save_excel(data, filepath):
     df = pd.DataFrame(data)
     df.to_excel(filepath+".xlsx", index=False)
 
 def plot_excel():
-    """
     data = pd.read_excel(open("mean_F1_gmm_diag.xlsx", 'rb')).to_numpy()
     #plot_color_3dmap(data, "3d_mean_F1_gmm")
     plot_color_gradients(data, "mean_F1_gmm")
@@ -273,10 +271,9 @@ def plot_excel():
     data = pd.read_excel(open("var_F1_kmeans.xlsx", 'rb')).to_numpy()
     #plot_color_3dmap(data, "3d_var_F1_kmeans")
     plot_color_gradients(data, "var_F1_kmeans", "white")
-    """
-
     data = pd.read_excel(open("var_F1_gmm_tied.xlsx", 'rb')).to_numpy()
     plot_color_gradients(data, "var_F1_gmm_tied", "white")
+    """
 
 if __name__ == '__main__':
     get_best_combination("kmeans")
